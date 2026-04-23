@@ -20,7 +20,7 @@ seasons, analysed and presented in collaboration with Claude AI.
 - *Dashboard and report coming soon*
 
 ## 🌦️ Climate
-- [Rainfall Dashboard](swadini-rainfall-dashboard.html)
+- [Rainfall Dashboard](swadini-area-rainfall-dashboard.html)
 - *Temperature dashboard coming soon*
 
 ---
