@@ -1,4 +1,3 @@
-# bosloper.github.io
 # Bosloper — Roaming the Bush
 
 *"He who roams the bush"*
@@ -12,6 +11,24 @@ shared with fellow naturalists, researchers, and conservation stakeholders.
 - **Biodiversity data** — species lists and distribution notes
 - **Swadini Biodiversity Project** — research reports and dashboards
 - **Photos** — wildlife and habitat imagery from the field
+
+---
+
+## Swadini Biodiversity Project
+
+The Swadini area of the Blyde River Canyon region is one of South Africa's
+most biodiverse hotspots. The reports and dashboards below are based on
+citizen science records collected over multiple survey seasons.
+
+### 🦋 Butterflies
+- [Swadini Butterflies Dashboard](swadini-butterflies-dashboard.html)
+- [Swadini Butterflies Report](swadini-butterflies-report.pdf)
+
+### 🪲 Odonata (Dragonflies & Damselflies)
+- [Swadini Odonata Dashboard](swadini-odonata-dashboard.html)
+- [Swadini Odonata Report](swadini-odonata-report.pdf)
+
+---
 
 ## About Bosloper
 
