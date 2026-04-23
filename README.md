@@ -21,12 +21,15 @@ most biodiverse hotspots. The reports and dashboards below are based on
 citizen science records collected over multiple survey seasons.
 
 ### 🦋 Butterflies
-- [Swadini Butterflies Dashboard](swadini-butterflies-dashboard.html)
-- [Swadini Butterflies Report](swadini-butterflies-report.pdf)
+- [Swadini Butterflies Dashboard](/hotspots/swadini/swadini-butterflies-dashboard.html)
+- [Swadini Butterflies Report](/hotspots/swadini/swadini-butterflies-report.pdf)
 
 ### 🪲 Odonata (Dragonflies & Damselflies)
-- [Swadini Odonata Dashboard](swadini-odonata-dashboard.html)
-- [Swadini Odonata Report](swadini-odonata-report.pdf)
+- [Swadini Odonata Dashboard](/hotspots/swadini/swadini-odonata-dashboard.html)
+- [Swadini Odonata Report](/hotspots/swadini/swadini-odonata-report.pdf)
+
+### Climate (Rainfall & Temperature)
+- [Swadini Rainfall Dashboard](/hotspots/swadini/swadini-area-rainfall-dashboard.html)
 
 ---
 
