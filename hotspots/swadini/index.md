@@ -30,10 +30,10 @@ seasons, analysed and presented in collaboration with Claude AI.
 Swadini lies on the western bank of the Blyde River within the Blyde River Canyon, one of the Top-10 largest canyons on earth, and certainly one of the most spectacular samples of natural beauty, wildlife diversity and special geological composition. The varied topography, 
 altitude gradients and proximity to the lowveld ensure an area of unique fauna and flora.
 
-Some of the endemic and rare species found in the area are:
-Marieps Charaxes butterfly (_Charaxes marieps_)
-Blyde River Aloe (_Aloe integra_)
-Eastern Scissortail dragonfly (_Microgomphus nyassicus_)
+Some of the endemic and rare species found in the area are: /n
+Marieps Charaxes butterfly (_Charaxes marieps_)  
+Blyde River Aloe (_Aloe integra_)  
+Eastern Scissortail dragonfly (_Microgomphus nyassicus_)  
 
 A new four-month biodiversity survey is planned for May 2026.
 
