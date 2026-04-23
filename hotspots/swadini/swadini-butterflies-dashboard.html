@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swadini Butterfly Observations — Andries de Vries</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1a14;
+    --surface: #162019;
+    --surface2: #1c2b21;
+    --border: #2a3d2f;
+    --gold: #c8a84b;
+    --gold-light: #e2c97e;
+    --green: #5aad6e;
+    --green-light: #8ecf9c;
+    --text: #d8e8da;
+    --text-dim: #7a9b82;
+    --accent1: #e07b54;
+    --accent2: #6baed6;
+    --accent3: #9e7ec8;
+    --accent4: #e8c34a;
+    --accent5: #5aad6e;
+    --accent6: #e05c7a;
+    --accent7: #4ab8b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0a1510 0%, var(--bg) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '🦋';
+    position: absolute;
+    right: 40px;
+    top: 24px;
+    font-size: 80px;
+    opacity: 0.08;
+  }
+
+  .subtitle {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 4vw, 40px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  h1 em {
+    color: var(--gold-light);
+    font-style: italic;
+  }
+
+  .meta {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 10px;
+  }
+
+  .stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .stat {
+    flex: 1;
+    min-width: 120px;
+    padding: 20px 28px;
+    border-right: 1px solid var(--border);
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 16px 24px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  nav a {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  nav a:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold-light);
+    margin-bottom: 6px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+  }
+
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 800px) {
+    .chart-grid-2 { grid-template-columns: 1fr; }
+    .stat { min-width: 50%; }
+  }
+
+  canvas { max-width: 100%; }
+
+  /* Heatmap */
+  .heatmap-wrap {
+    overflow-x: auto;
+  }
+
+  table.heatmap {
+    border-collapse: collapse;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 10px;
+    width: 100%;
+  }
+
+  table.heatmap th {
+    padding: 4px 6px;
+    color: var(--text-dim);
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  table.heatmap th.species-col {
+    text-align: left;
+    min-width: 180px;
+    padding-right: 12px;
+  }
+
+  table.heatmap td {
+    width: 38px;
+    height: 22px;
+    text-align: center;
+    border: 1px solid var(--bg);
+    font-size: 9px;
+    color: var(--text-dim);
+    transition: opacity 0.15s;
+  }
+
+  table.heatmap td:hover { opacity: 0.7; }
+
+  table.heatmap td.species-name {
+    text-align: left;
+    padding-right: 12px;
+    white-space: nowrap;
+    color: var(--text);
+    font-size: 10px;
+    width: auto;
+    min-width: 180px;
+  }
+
+  table.heatmap td.species-name em {
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 9px;
+  }
+
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .legend-swatch {
+    display: inline-block;
+    width: 20px;
+    height: 12px;
+    border-radius: 1px;
+    vertical-align: middle;
+  }
+
+  /* Presence/Absence matrix */
+  .matrix-wrap { overflow-x: auto; }
+
+  table.matrix {
+    border-collapse: collapse;
+    font-size: 10px;
+    font-family: 'Source Code Pro', monospace;
+    width: 100%;
+  }
+
+  table.matrix th {
+    padding: 6px 10px;
+    color: var(--text-dim);
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  table.matrix th.sp-col {
+    text-align: left;
+    min-width: 170px;
+  }
+
+  table.matrix td {
+    padding: 3px 10px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  table.matrix td.sp-name {
+    text-align: left;
+    font-style: italic;
+    color: var(--text);
+    font-size: 10px;
+  }
+
+  .dot-present { color: var(--green); font-size: 14px; line-height: 1; }
+  .dot-absent { color: #2a3d2f; font-size: 14px; line-height: 1; }
+
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  .filter-row label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .filter-row select, .filter-row input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 10px;
+    font-size: 12px;
+    font-family: 'Source Code Pro', monospace;
+    border-radius: 2px;
+    outline: none;
+  }
+
+  .filter-row select:focus, .filter-row input:focus {
+    border-color: var(--gold);
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px;
+    font-size: 11px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="subtitle">Citizen Science · Lepidoptera · Observation.org</div>
+  <h1>Swadini Butterfly Observations<br><em>Blyde River Canyon, Mpumalanga</em></h1>
+  <div class="meta">Observer: Andries de Vries &nbsp;·&nbsp; 2019 – 2025 &nbsp;·&nbsp; ~1.1 km² study area</div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">1,957</div><div class="stat-label">Total Records</div></div>
+  <div class="stat"><div class="stat-num">170</div><div class="stat-label">Species (normalised)</div></div>
+  <div class="stat"><div class="stat-num">7</div><div class="stat-label">Seasons</div></div>
+  <div class="stat"><div class="stat-num">6</div><div class="stat-label">Families</div></div>
+  <div class="stat"><div class="stat-num">91</div><div class="stat-label">Species with absences</div></div>
+</div>
+
+<nav>
+  <a href="#richness">Species Richness</a>
+  <a href="#effort">Effort & Coverage</a>
+  <a href="#families">Families</a>
+  <a href="#heatmap">Weekly Heatmap</a>
+  <a href="#presence">Presence / Absence</a>
+  <a href="#species-weeks">Species by Week</a>
+  <a href="#comparable-weeks">Comparable Weeks</a>
+</nav>
+
+<div class="container">
+
+  <!-- CHART 1: Species richness per year -->
+  <section id="richness">
+    <div class="section-title">Species Richness by Year</div>
+    <div class="section-note">Number of unique species recorded per season (normalised to species level). Records by year shown as secondary axis.</div>
+    <div class="chart-card">
+      <canvas id="richness-chart" height="90"></canvas>
+    </div>
+  </section>
+
+  <!-- CHART 2: Effort & week coverage -->
+  <section id="effort">
+    <div class="section-title">Observation Effort & IOC Week Coverage</div>
+    <div class="section-note">Left: records per year as a proxy for effort. Right: IOC weeks surveyed per year — shorter bars indicate a constrained season.</div>
+    <div class="chart-grid-2">
+      <div class="chart-card"><canvas id="records-chart" height="160"></canvas></div>
+      <div class="chart-card"><canvas id="weeks-chart" height="160"></canvas></div>
+    </div>
+  </section>
+
+  <!-- CHART 3: Family breakdown -->
+  <section id="families">
+    <div class="section-title">Species by Family per Year</div>
+    <div class="section-note">Stacked bars showing how many unique species per family were recorded each year.</div>
+    <div class="chart-card">
+      <canvas id="family-chart" height="100"></canvas>
+    </div>
+  </section>
+
+  <!-- CHART 4: Weekly heatmap -->
+  <section id="heatmap">
+    <div class="section-title">Species Diversity by IOC Week × Year</div>
+    <div class="section-note">Number of distinct species observed per week, per year. Reveals seasonal peaks and gaps. Blank = no observations that week.</div>
+    <div class="chart-card">
+      <canvas id="heatmap-chart" height="160"></canvas>
+    </div>
+  </section>
+
+  <!-- CHART 5: Presence/Absence matrix -->
+  <section id="presence">
+    <div class="section-title">Species Presence / Absence Matrix</div>
+    <div class="section-note">Shows all species recorded at Swadini. ● = present that year, · = absent. <strong style="color:var(--gold)">To see ALL 170 species: set "Min years seen" to "1+ (all species)"</strong> — this is the default. Use the Family filter to browse by group, or search by name.</div>
+    <div class="chart-card">
+      <div class="filter-row">
+        <label>Filter:</label>
+        <input type="text" id="sp-search" placeholder="Search species…" style="width:200px">
+        <label>Absent in year:</label>
+        <select id="absent-year-filter">
+          <option value="">All</option>
+          <option>2019</option><option>2020</option><option>2021</option>
+          <option>2022</option><option>2023</option><option>2024</option><option>2025</option>
+        </select>
+        <label>Min years seen:</label>
+        <select id="min-years-filter">
+          <option value="1">1+  (all species)</option>
+          <option value="2">2+</option><option value="3">3+</option>
+          <option value="4">4+</option><option value="5">5+</option>
+        </select>
+        <label>Family:</label>
+        <select id="family-filter">
+          <option value="">All families</option>
+          <option>Hesperiidae</option><option>Lycaenidae</option>
+          <option>Nymphalidae</option><option>Papilionidae</option><option>Pieridae</option>
+        </select>
+      </div>
+      <div class="filter-row" style="margin-top:6px">
+        <button id="toggle-spec" onclick="toggleSpec()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);padding:5px 14px;font-size:11px;font-family:'Source Code Pro',monospace;letter-spacing:1px;border-radius:2px;cursor:pointer">
+          spec. ON
+        </button>
+        <button id="toggle-view" onclick="toggleView()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);padding:5px 14px;font-size:11px;font-family:'Source Code Pro',monospace;letter-spacing:1px;border-radius:2px;cursor:pointer;margin-left:4px">
+          VIEW: PRESENCE &amp; ABSENCE
+        </button>
+        <span id="matrix-total" style="font-family:'Source Code Pro',monospace;font-size:11px;color:var(--gold);margin-left:16px"></span>
+      </div>
+      <div class="matrix-wrap"><div id="matrix-container"></div></div>
+    </div>
+  </section>
+
+  <!-- CHART 6: Individual species week chart -->
+  <section id="species-weeks">
+    <div class="section-title">IOC Week Distribution by Species</div>
+    <div class="section-note">Select a species to see which IOC weeks it was observed, year by year. Each dot = one observation date. Reveals temporal shifts and absences.</div>
+    <div class="chart-card">
+      <div class="filter-row">
+        <label>Species:</label>
+        <select id="species-selector" style="min-width:260px"></select>
+      </div>
+      <canvas id="species-week-chart" height="220"></canvas>
+      <div id="species-week-note" style="margin-top:12px;font-size:11px;color:var(--text-dim);font-style:italic;"></div>
+    </div>
+  </section>
+
+  <!-- CHART 7: Comparable weeks -->
+  <section id="comparable-weeks">
+    <div class="section-title">Species per IOC Week — Comparable Weeks Only</div>
+    <div class="section-note">Only weeks surveyed in 5 or more of 7 years (≥75% coverage) are shown. 2019 data excludes 2 records incorrectly attributed to Swadini on 30 September 2019 (observed at Izinkwe Game Lodge, Limpopo). Each line = one year. Zero values mean you were present but recorded nothing that week. Gaps mean the week falls outside your survey window that year. This is your most statistically honest cross-year comparison.</div>
+    <div class="chart-card">
+      <canvas id="comparable-weeks-chart" height="220"></canvas>
+    </div>
+    <div class="chart-card" style="margin-top:16px">
+      <div style="font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px">Comparable weeks detail — species count per week per year</div>
+      <div style="overflow-x:auto" id="comparable-table"></div>
+    </div>
+  </section>
+
+
+</div>
+
+<footer>Swadini, Forever Resort · Blyderivierspoort · Data: Observation.org · Normalised to species level</footer>
+
+<script>
+const DATA = {"years":[2019, 2020, 2021, 2022, 2023, 2024, 2025],"richness":{"2019": 57, "2020": 48, "2021": 83, "2022": 79, "2023": 85, "2024": 58, "2025": 92},"records":{"2019": 98, "2020": 81, "2021": 398, "2022": 356, "2023": 413, "2024": 196, "2025": 415},"week_year":[{"year": 2019, "ioc_week": 18, "sci_species": 12}, {"year": 2019, "ioc_week": 19, "sci_species": 6}, {"year": 2019, "ioc_week": 20, "sci_species": 9}, {"year": 2019, "ioc_week": 21, "sci_species": 9}, {"year": 2019, "ioc_week": 22, "sci_species": 13}, {"year": 2019, "ioc_week": 23, "sci_species": 6}, {"year": 2019, "ioc_week": 24, "sci_species": 2}, {"year": 2019, "ioc_week": 25, "sci_species": 6}, {"year": 2019, "ioc_week": 26, "sci_species": 3}, {"year": 2019, "ioc_week": 27, "sci_species": 1}, {"year": 2019, "ioc_week": 28, "sci_species": 4}, {"year": 2019, "ioc_week": 29, "sci_species": 7}, {"year": 2019, "ioc_week": 30, "sci_species": 2}, {"year": 2019, "ioc_week": 31, "sci_species": 5}, {"year": 2019, "ioc_week": 46, "sci_species": 3}, {"year": 2019, "ioc_week": 47, "sci_species": 3}, {"year": 2020, "ioc_week": 33, "sci_species": 1}, {"year": 2020, "ioc_week": 35, "sci_species": 7}, {"year": 2020, "ioc_week": 36, "sci_species": 3}, {"year": 2020, "ioc_week": 37, "sci_species": 14}, {"year": 2020, "ioc_week": 38, "sci_species": 8}, {"year": 2020, "ioc_week": 40, "sci_species": 12}, {"year": 2020, "ioc_week": 41, "sci_species": 20}, {"year": 2020, "ioc_week": 42, "sci_species": 5}, {"year": 2021, "ioc_week": 16, "sci_species": 12}, {"year": 2021, "ioc_week": 17, "sci_species": 10}, {"year": 2021, "ioc_week": 18, "sci_species": 12}, {"year": 2021, "ioc_week": 19, "sci_species": 9}, {"year": 2021, "ioc_week": 20, "sci_species": 2}, {"year": 2021, "ioc_week": 21, "sci_species": 17}, {"year": 2021, "ioc_week": 22, "sci_species": 17}, {"year": 2021, "ioc_week": 23, "sci_species": 8}, {"year": 2021, "ioc_week": 24, "sci_species": 20}, {"year": 2021, "ioc_week": 25, "sci_species": 6}, {"year": 2021, "ioc_week": 26, "sci_species": 3}, {"year": 2021, "ioc_week": 27, "sci_species": 26}, {"year": 2021, "ioc_week": 28, "sci_species": 20}, {"year": 2021, "ioc_week": 29, "sci_species": 27}, {"year": 2021, "ioc_week": 30, "sci_species": 25}, {"year": 2021, "ioc_week": 31, "sci_species": 14}, {"year": 2021, "ioc_week": 32, "sci_species": 29}, {"year": 2021, "ioc_week": 33, "sci_species": 17}, {"year": 2021, "ioc_week": 34, "sci_species": 17}, {"year": 2021, "ioc_week": 35, "sci_species": 19}, {"year": 2022, "ioc_week": 17, "sci_species": 7}, {"year": 2022, "ioc_week": 18, "sci_species": 6}, {"year": 2022, "ioc_week": 19, "sci_species": 10}, {"year": 2022, "ioc_week": 20, "sci_species": 10}, {"year": 2022, "ioc_week": 21, "sci_species": 3}, {"year": 2022, "ioc_week": 22, "sci_species": 10}, {"year": 2022, "ioc_week": 23, "sci_species": 21}, {"year": 2022, "ioc_week": 24, "sci_species": 9}, {"year": 2022, "ioc_week": 25, "sci_species": 8}, {"year": 2022, "ioc_week": 26, "sci_species": 14}, {"year": 2022, "ioc_week": 27, "sci_species": 21}, {"year": 2022, "ioc_week": 28, "sci_species": 15}, {"year": 2022, "ioc_week": 29, "sci_species": 8}, {"year": 2022, "ioc_week": 30, "sci_species": 23}, {"year": 2022, "ioc_week": 31, "sci_species": 18}, {"year": 2022, "ioc_week": 32, "sci_species": 25}, {"year": 2022, "ioc_week": 33, "sci_species": 32}, {"year": 2022, "ioc_week": 34, "sci_species": 19}, {"year": 2023, "ioc_week": 17, "sci_species": 18}, {"year": 2023, "ioc_week": 18, "sci_species": 7}, {"year": 2023, "ioc_week": 19, "sci_species": 16}, {"year": 2023, "ioc_week": 20, "sci_species": 20}, {"year": 2023, "ioc_week": 21, "sci_species": 23}, {"year": 2023, "ioc_week": 22, "sci_species": 41}, {"year": 2023, "ioc_week": 23, "sci_species": 24}, {"year": 2023, "ioc_week": 24, "sci_species": 18}, {"year": 2023, "ioc_week": 25, "sci_species": 29}, {"year": 2023, "ioc_week": 26, "sci_species": 17}, {"year": 2023, "ioc_week": 27, "sci_species": 10}, {"year": 2023, "ioc_week": 28, "sci_species": 17}, {"year": 2023, "ioc_week": 29, "sci_species": 2}, {"year": 2023, "ioc_week": 30, "sci_species": 29}, {"year": 2023, "ioc_week": 31, "sci_species": 1}, {"year": 2023, "ioc_week": 32, "sci_species": 6}, {"year": 2023, "ioc_week": 33, "sci_species": 15}, {"year": 2024, "ioc_week": 17, "sci_species": 6}, {"year": 2024, "ioc_week": 18, "sci_species": 12}, {"year": 2024, "ioc_week": 19, "sci_species": 7}, {"year": 2024, "ioc_week": 20, "sci_species": 31}, {"year": 2024, "ioc_week": 21, "sci_species": 18}, {"year": 2024, "ioc_week": 22, "sci_species": 2}, {"year": 2024, "ioc_week": 24, "sci_species": 25}, {"year": 2024, "ioc_week": 25, "sci_species": 3}, {"year": 2024, "ioc_week": 26, "sci_species": 7}, {"year": 2024, "ioc_week": 27, "sci_species": 13}, {"year": 2024, "ioc_week": 28, "sci_species": 1}, {"year": 2024, "ioc_week": 29, "sci_species": 5}, {"year": 2024, "ioc_week": 31, "sci_species": 5}, {"year": 2024, "ioc_week": 32, "sci_species": 5}, {"year": 2024, "ioc_week": 33, "sci_species": 2}, {"year": 2024, "ioc_week": 44, "sci_species": 1}, {"year": 2025, "ioc_week": 18, "sci_species": 8}, {"year": 2025, "ioc_week": 19, "sci_species": 34}, {"year": 2025, "ioc_week": 20, "sci_species": 12}, {"year": 2025, "ioc_week": 21, "sci_species": 20}, {"year": 2025, "ioc_week": 22, "sci_species": 39}, {"year": 2025, "ioc_week": 23, "sci_species": 13}, {"year": 2025, "ioc_week": 24, "sci_species": 17}, {"year": 2025, "ioc_week": 25, "sci_species": 31}, {"year": 2025, "ioc_week": 26, "sci_species": 29}, {"year": 2025, "ioc_week": 29, "sci_species": 13}, {"year": 2025, "ioc_week": 30, "sci_species": 23}, {"year": 2025, "ioc_week": 31, "sci_species": 9}, {"year": 2025, "ioc_week": 32, "sci_species": 14}, {"year": 2025, "ioc_week": 33, "sci_species": 20}, {"year": 2025, "ioc_week": 34, "sci_species": 14}, {"year": 2025, "ioc_week": 35, "sci_species": 7}]};
+
+// Inject absent_species and species_week_year from Python output
+</script>
+<script>
+// These are injected inline to keep file self-contained
+const ABSENT_DATA = {"Acleros mackenii": {"seen": [2019, 2021, 2022, 2025], "absent": [2020, 2023, 2024]}, "Acraea acara": {"seen": [2019, 2020, 2021, 2023, 2024], "absent": [2022, 2025]}, "Acraea aganice": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Acraea aglaonice": {"seen": [2019, 2021, 2023, 2024], "absent": [2020, 2022, 2025]}, "Acraea anemosa": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Acraea axina": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Acraea caldarena": {"seen": [2019, 2021, 2024], "absent": [2020, 2022, 2023, 2025]}, "Acraea natalica": {"seen": [2020, 2021, 2023], "absent": [2019, 2022, 2024, 2025]}, "Acraea neobule": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Acraea oncaea": {"seen": [2019], "absent": [2020, 2021, 2022, 2023, 2024, 2025]}, "Afrodryas leda": {"seen": [2021, 2022, 2025], "absent": [2019, 2020, 2023, 2024]}, "Afrogegenes letterstedti": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Amauris albimaculata": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Amauris echeria": {"seen": [2019, 2021], "absent": [2020, 2022, 2023, 2024, 2025]}, "Amauris niavius": {"seen": [2021, 2023, 2024], "absent": [2019, 2020, 2022, 2025]}, "Andronymus neander": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Anthene amarah": {"seen": [2021, 2022, 2023, 2024, 2025], "absent": [2019, 2020]}, "Anthene definita": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Anthene princeps": {"seen": [2021, 2023], "absent": [2019, 2020, 2022, 2024, 2025]}, "Anthene spec.": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Axiocerses amanga": {"seen": [2020, 2022, 2023, 2024, 2025], "absent": [2019, 2021]}, "Axiocerses coalescens": {"seen": [2019], "absent": [2020, 2021, 2022, 2023, 2024, 2025]}, "Axiocerses tjoane": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Azanus jesous": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Azanus mirza": {"seen": [2021, 2023], "absent": [2019, 2020, 2022, 2024, 2025]}, "Azanus moriqua": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Azanus natalensis": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Belenois aurota": {"seen": [2021, 2022, 2023, 2024, 2025], "absent": [2019, 2020]}, "Belenois creona": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Belenois gidica": {"seen": [2020, 2021, 2022, 2023, 2024, 2025], "absent": [2019]}, "Belenois zochalia": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Bicyclus anynana": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Bicyclus ena": {"seen": [2019, 2020, 2025], "absent": [2021, 2022, 2023, 2024]}, "Bicyclus safitza": {"seen": [2020, 2021, 2023, 2024, 2025], "absent": [2019, 2022]}, "Borbo borbonica": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Borbo fatuellus": {"seen": [2019, 2021, 2023, 2025], "absent": [2020, 2022, 2024]}, "Borbo gemella": {"seen": [2024], "absent": [2019, 2020, 2021, 2022, 2023, 2025]}, "Borbo spec.": {"seen": [2019, 2021], "absent": [2020, 2022, 2023, 2024, 2025]}, "Brakefieldia perspicua": {"seen": [2020, 2021, 2022, 2023, 2024, 2025], "absent": [2019]}, "Byblia anvatara": {"seen": [2023, 2024], "absent": [2019, 2020, 2021, 2022, 2025]}, "Byblia ilithyia": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Byblia spec.": {"seen": [2019, 2021, 2022, 2023], "absent": [2020, 2024, 2025]}, "Cacyreus lingeus": {"seen": [2022, 2024], "absent": [2019, 2020, 2021, 2023, 2025]}, "Cacyreus marshalli": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Catopsilia florella": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Charaxes achaemenes": {"seen": [2019, 2021, 2025], "absent": [2020, 2022, 2023, 2024]}, "Charaxes brutus": {"seen": [2019, 2020, 2022, 2023, 2024, 2025], "absent": [2021]}, "Charaxes candiope": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Charaxes druceanus": {"seen": [2023, 2025], "absent": [2019, 2020, 2021, 2022, 2024]}, "Charaxes ethalion": {"seen": [2024, 2025], "absent": [2019, 2020, 2021, 2022, 2023]}, "Charaxes jahlusa": {"seen": [2020, 2021, 2022, 2023, 2025], "absent": [2019, 2024]}, "Charaxes jasius": {"seen": [2020, 2021, 2023], "absent": [2019, 2022, 2024, 2025]}, "Charaxes marieps": {"seen": [2021, 2022], "absent": [2019, 2020, 2023, 2024, 2025]}, "Charaxes phaeus": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Charaxes spec.": {"seen": [2019, 2020, 2021, 2022, 2023], "absent": [2024, 2025]}, "Charaxes vansoni": {"seen": [2019, 2021, 2023], "absent": [2020, 2022, 2024, 2025]}, "Charaxes varanes": {"seen": [2019, 2020, 2021, 2022, 2023, 2025], "absent": [2024]}, "Charaxes zoolina": {"seen": [2020, 2021, 2023, 2025], "absent": [2019, 2022, 2024]}, "Cigaritis natalensis": {"seen": [2020, 2024], "absent": [2019, 2021, 2022, 2023, 2025]}, "Colotis annae": {"seen": [2020, 2021, 2022, 2023, 2024], "absent": [2019, 2025]}, "Colotis antevippe": {"seen": [2022, 2023, 2024, 2025], "absent": [2019, 2020, 2021]}, "Colotis euippe": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Colotis evagore": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Colotis evenina": {"seen": [2022, 2023, 2025], "absent": [2019, 2020, 2021, 2024]}, "Colotis ione": {"seen": [2021, 2022, 2023, 2024], "absent": [2019, 2020, 2025]}, "Colotis pallene": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Colotis regina": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Colotis spec.": {"seen": [2020, 2021, 2022, 2023, 2024], "absent": [2019, 2025]}, "Colotis vesta": {"seen": [2021, 2023, 2024, 2025], "absent": [2019, 2020, 2022]}, "Cupidopsis jobates": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Danaus chrysippus": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Deudorix antalus": {"seen": [2022, 2023], "absent": [2019, 2020, 2021, 2024, 2025]}, "Deudorix dinochares": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Deudorix diocles": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Dixeia charina": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Dixeia pigea": {"seen": [2019, 2020, 2021, 2022, 2023, 2024], "absent": [2025]}, "Dixeia spilleri": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Eagris nottoana": {"seen": [2022, 2025], "absent": [2019, 2020, 2021, 2023, 2024]}, "Eicochrysops hippocrates": {"seen": [2019, 2022, 2023, 2024, 2025], "absent": [2020, 2021]}, "Eronia cleodora": {"seen": [2023, 2024, 2025], "absent": [2019, 2020, 2021, 2022]}, "Euchrysops osiris": {"seen": [2019, 2021], "absent": [2020, 2022, 2023, 2024, 2025]}, "Eurema brigitta": {"seen": [2019, 2020, 2021, 2022, 2023], "absent": [2024, 2025]}, "Eurema desjardinsii": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Eurema floricola": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Eurema hecabe": {"seen": [2021, 2023, 2025], "absent": [2019, 2020, 2022, 2024]}, "Eurema regularis": {"seen": [2021, 2023, 2024], "absent": [2019, 2020, 2022, 2025]}, "Eurytela dryope": {"seen": [2023, 2024], "absent": [2019, 2020, 2021, 2022, 2025]}, "Favonius quercus": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Freyeria trochylus": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Gegenes pumilio": {"seen": [2021, 2022], "absent": [2019, 2020, 2023, 2024, 2025]}, "Gegenes spec.": {"seen": [2019, 2021, 2022, 2023], "absent": [2020, 2024, 2025]}, "Gomalia elma": {"seen": [2022, 2025], "absent": [2019, 2020, 2021, 2023, 2024]}, "Graphium antheus": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Hamanumida daedalus": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Hemiolaus caeculus": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Hypolimnas anthedon": {"seen": [2019, 2020, 2021, 2022, 2024, 2025], "absent": [2023]}, "Hypolimnas misippus": {"seen": [2019, 2022, 2025], "absent": [2020, 2021, 2023, 2024]}, "Hypolycaena philippus": {"seen": [2021, 2023, 2024, 2025], "absent": [2019, 2020, 2022]}, "Junonia elgiva": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Junonia hierta": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Junonia natalica": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Junonia oenone": {"seen": [2019, 2020, 2021, 2022, 2024, 2025], "absent": [2023]}, "Junonia terea": {"seen": [2019, 2020, 2021, 2022, 2023, 2024], "absent": [2025]}, "Lachnocnema bibulus": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Lachnoptera ayresii": {"seen": [2022, 2023], "absent": [2019, 2020, 2021, 2024, 2025]}, "Lampides boeticus": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Lepidochrysops patricia": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Lepidoptera indet.": {"seen": [2019, 2020, 2021, 2022, 2023, 2024], "absent": [2025]}, "Leptomyrina hirundo": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Leptosia alcesta": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Leptotes pirithous": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Leptotes pirithous-complex": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Libythea labdaca laius": {"seen": [2019], "absent": [2020, 2021, 2022, 2023, 2024, 2025]}, "Melanitis leda": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Mylothris agathina": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Myrina silenus": {"seen": [2019], "absent": [2020, 2021, 2022, 2023, 2024, 2025]}, "Nepheronia argia": {"seen": [2022, 2024], "absent": [2019, 2020, 2021, 2023, 2025]}, "Nepheronia thalassina": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Neptis goochii": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Neptis laeta": {"seen": [2019, 2023], "absent": [2020, 2021, 2022, 2024, 2025]}, "Neptis saclava": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Neptis trigonophora": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Papilio constantinus": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Papilio dardanus": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Papilio demodocus": {"seen": [2019, 2020, 2022, 2023, 2025], "absent": [2021, 2024]}, "Papilio echerioides": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Papilio nireus": {"seen": [2020, 2025], "absent": [2019, 2021, 2022, 2023, 2024]}, "Parnara monasi": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Pelopidas mathias": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Pelopidas thrax": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Phalanta eurytis": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Phalanta phalantha": {"seen": [2021, 2022, 2023, 2024], "absent": [2019, 2020, 2025]}, "Pinacopteryx eriphia": {"seen": [2021, 2022, 2023, 2024, 2025], "absent": [2019, 2020]}, "Precis antilope": {"seen": [2020, 2023], "absent": [2019, 2021, 2022, 2024, 2025]}, "Precis archesia": {"seen": [2019, 2021, 2025], "absent": [2020, 2022, 2023, 2024]}, "Precis octavia": {"seen": [2019, 2020, 2021, 2024, 2025], "absent": [2022, 2023]}, "Precis tugela": {"seen": [2019, 2021, 2022, 2023, 2025], "absent": [2020, 2024]}, "Protogoniomorpha nebulosa": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Protogoniomorpha parhassus": {"seen": [2019, 2020, 2021, 2022, 2025], "absent": [2023, 2024]}, "Pseudacraea boisduvalii": {"seen": [2021, 2022, 2023, 2025], "absent": [2019, 2020, 2024]}, "Pseudacraea lucretia": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Pseudonacaduba sichela": {"seen": [2023], "absent": [2019, 2020, 2021, 2022, 2024, 2025]}, "Salamis anacardii": {"seen": [2019, 2020, 2021, 2022, 2023], "absent": [2024, 2025]}, "Sarangesa motozi": {"seen": [2021], "absent": [2019, 2020, 2022, 2023, 2024, 2025]}, "Sarangesa seineri": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Sevenia boisduvali": {"seen": [2019, 2021, 2022, 2023, 2025], "absent": [2020, 2024]}, "Sevenia natalensis": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Spialia delagoae": {"seen": [2022], "absent": [2019, 2020, 2021, 2023, 2024, 2025]}, "Stephenia aglaonice": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Stephenia natalica": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Stephenia oncaea": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Stugeta bowkeri": {"seen": [2024], "absent": [2019, 2020, 2021, 2022, 2023, 2025]}, "Tagiades flesus": {"seen": [2019, 2020, 2021, 2022, 2023, 2024, 2025], "absent": []}, "Telchinia encedon": {"seen": [2019, 2021, 2022, 2025], "absent": [2020, 2023, 2024]}, "Telchinia esebria": {"seen": [2022, 2023, 2024, 2025], "absent": [2019, 2020, 2021]}, "Telchinia rahira": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Telchinia serena": {"seen": [2019, 2021, 2022, 2023, 2024, 2025], "absent": [2020]}, "Teracolus agoye": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Teracolus eris": {"seen": [2021, 2022, 2023], "absent": [2019, 2020, 2024, 2025]}, "Terias brigitta": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Terias brigitta brigitta": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Terias desjardinsii": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Terias floricola": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Tildia acara": {"seen": [2025], "absent": [2019, 2020, 2021, 2022, 2023, 2024]}, "Tuxentius calice": {"seen": [2022, 2025], "absent": [2019, 2020, 2021, 2023, 2024]}, "Tuxentius melaena": {"seen": [2021, 2022, 2023, 2024, 2025], "absent": [2019, 2020]}, "Vanessa cardui": {"seen": [2022, 2025], "absent": [2019, 2020, 2021, 2023, 2024]}, "Ypthima impura": {"seen": [2020], "absent": [2019, 2021, 2022, 2023, 2024, 2025]}, "Zizeeria knysna": {"seen": [2021, 2022, 2023, 2025], "absent": [2019, 2020, 2024]}, "Zizula hylax": {"seen": [2022, 2025], "absent": [2019, 2020, 2021, 2023, 2024]}};
+
+const SPECIES_WEEKS = {"Acleros mackenii":{"2019":[22],"2021":[24,28,31,32,33,34],"2022":[27,27,34],"2025":[31]},"Acraea acara":{"2019":[30],"2020":[38,41],"2021":[21,25],"2023":[26],"2024":[33]},"Acraea aganice":{"2022":[20]},"Acraea aglaonice":{"2019":[18,18,22],"2021":[27,29],"2023":[29],"2024":[21,21]},"Acraea anemosa":{"2020":[41]},"Acraea axina":{"2021":[24]},"Acraea caldarena":{"2019":[18,21],"2021":[21,29],"2024":[29]},"Acraea natalica":{"2020":[41],"2021":[17,30],"2023":[21]},"Acraea neobule":{"2025":[19]},"Acraea oncaea":{"2019":[21]},"Afrodryas leda":{"2021":[19,29],"2022":[28],"2025":[34]},"Afrogegenes letterstedti":{"2022":[30]},"Amauris albimaculata":{"2021":[32]},"Amauris echeria":{"2019":[47],"2021":[35]},"Amauris niavius":{"2021":[27],"2023":[25,28,30,32,33],"2024":[24]},"Andronymus neander":{"2025":[31]},"Anthene amarah":{"2021":[23],"2022":[28,33],"2023":[17,17,17,25,25,30],"2024":[18,20,21],"2025":[19,20,22]},"Anthene definita":{"2021":[16,18]},"Anthene princeps":{"2021":[32],"2023":[22]},"Anthene spec.":{"2023":[24]},"Axiocerses amanga":{"2020":[36,40],"2022":[34,34],"2023":[20,22,25],"2024":[21],"2025":[22,22,30,35]},"Axiocerses coalescens":{"2019":[21]},"Axiocerses tjoane":{"2021":[17]},"Azanus jesous":{"2023":[23]},"Azanus mirza":{"2021":[34],"2023":[19]},"Azanus moriqua":{"2020":[40,41]},"Azanus natalensis":{"2020":[40]},"Belenois aurota":{"2021":[21,22,22,29,33],"2022":[19,26,27,33],"2023":[25],"2024":[20],"2025":[26,32]},"Belenois creona":{"2019":[18,18,18,25],"2020":[37,41],"2021":[18,19,22,22,23,23,24,24,24,27,27,27,27,27,27,28,29,29,29,30,30,30,31,35],"2022":[17,22,23,23,23,25,26,26,26,26,26,27,28,28,28,28,29,30,30,30,30,31,31,31,31,32,32,33,33,33,33,33,34,34],"2023":[17,18,19,20,21,21,21,21,22,22,22,23,24,24,24,24,25,25,25,25,26,26,27,28,28,28,28,30],"2024":[20,20,21,21,24,24,24,24,24,26,27,31,31],"2025":[19,19,19,22,22,24,24,25,26,29]},"Belenois gidica":{"2020":[37,41],"2021":[16,18,20,21,23,23,24,27,27,29,30,31,32,32],"2022":[17,21,22,22,23,23,24,24,25,26,27,27,30,32,32,33,33],"2023":[20,21,21,22,22,23,23,23,24,27,28,28,30,30],"2024":[17,18,19,20,21,21,24,24,24,27,27],"2025":[18,21,21,25,25,26,29,29,30]},"Belenois zochalia":{"2022":[31]},"Bicyclus anynana":{"2019":[25],"2020":[41],"2021":[17,18,21,27,27,27,27,28,28,28,28,29,30,30,32,33,34,35,35],"2022":[17,18,18,19,22,23,23,25,26,27,29,29,30,30,30,30,34,34,34,34],"2023":[17,19,19,20,21,21,21,22,22,22,22,25,26,26,27,28,29,30,30,33],"2024":[17,18,19,19,20,20,20,20,24,24,24,24,32],"2025":[18,19,19,19,21,22,22,22,22,22,23,24,24,24,25,25,25,25,25,26,26,26,26,31,32,32,33]},"Bicyclus ena":{"2019":[20],"2020":[38,41,41],"2025":[19]},"Bicyclus safitza":{"2020":[35,42],"2021":[17,18,19,22,22,30,30,33,34,35],"2023":[20,21,21],"2024":[18,18,20,24],"2025":[22]},"Borbo borbonica":{"2023":[23,24,26]},"Borbo fatuellus":{"2019":[22],"2021":[28,32,33,34],"2023":[19,26,27],"2025":[22,24,24,30,34]},"Borbo gemella":{"2024":[32]},"Borbo spec.":{"2019":[26],"2021":[33]},"Brakefieldia perspicua":{"2020":[37],"2021":[16,31,35,35,35],"2022":[32,33,33],"2023":[19,20,25],"2024":[18,21,32],"2025":[24,30]},"Byblia anvatara":{"2023":[23],"2024":[20]},"Byblia ilithyia":{"2019":[22],"2020":[41],"2021":[16,18,19,24,25,28,30,32],"2022":[23,30],"2023":[22,22],"2024":[20,20],"2025":[18,19,20,20,21,21,21,22,22,22,22,22,22,23,23,25,25,25,25,26,26]},"Byblia spec.":{"2019":[20,29],"2021":[33],"2022":[20],"2023":[19,22]},"Cacyreus lingeus":{"2022":[27,32],"2024":[19,24,24,26]},"Cacyreus marshalli":{"2025":[29]},"Catopsilia florella":{"2019":[20,22,22,25],"2021":[19,29],"2022":[22,23,23,26,28],"2023":[17,17,20,23,23,24,26],"2024":[21,21,21,21,24],"2025":[19,19,20,21,22,22,23,25,25,25,26,29,30,30,30,30]},"Charaxes achaemenes":{"2019":[19,22,23],"2021":[21,24],"2025":[22,22,22,23]},"Charaxes brutus":{"2019":[19],"2020":[40],"2022":[21,27],"2023":[22,24],"2024":[20,21],"2025":[20]},"Charaxes candiope":{"2023":[30]},"Charaxes druceanus":{"2023":[21],"2025":[19]},"Charaxes ethalion":{"2024":[20],"2025":[21,34]},"Charaxes jahlusa":{"2020":[38],"2021":[17,21,21],"2022":[21],"2023":[22,22,23,25],"2025":[19,22,22,22,22,26]},"Charaxes jasius":{"2020":[36,36],"2021":[16,24],"2023":[23,23]},"Charaxes marieps":{"2021":[34],"2022":[33]},"Charaxes phaeus":{"2019":[20,24,25],"2020":[42],"2021":[26,32],"2022":[33],"2023":[18,19,21,21,22,22,22,22,22,22,23,23,23,24,24,24,33],"2024":[18,18],"2025":[19,19,19,19,21,22,22,22,22,24,25,25,26,26,29,32]},"Charaxes spec.":{"2019":[25],"2020":[40,40],"2021":[26],"2022":[20,33],"2023":[22]},"Charaxes vansoni":{"2019":[21],"2021":[32],"2023":[23]},"Charaxes varanes":{"2019":[20,31],"2020":[36,37,40],"2021":[34,35],"2022":[23,27,27],"2023":[22,24],"2025":[26,29,29,30,32,33,34]},"Charaxes zoolina":{"2020":[40],"2021":[31,33],"2023":[22,22,22,22],"2025":[19,19,20,22,25]},"Cigaritis natalensis":{"2020":[41],"2024":[24]},"Colotis annae":{"2020":[41,41],"2021":[21,22,27,34,35],"2022":[31,33,34,34],"2023":[21,25,30,33],"2024":[24,24,25]},"Colotis antevippe":{"2022":[30],"2023":[27],"2024":[24,27,27],"2025":[33]},"Colotis euippe":{"2019":[18],"2021":[26,27,29,30,32,32,34,35],"2022":[18,27,28,30],"2023":[20,22,23,25,25,28,28],"2024":[20,20,24,24,27,29],"2025":[22,26,30,30,30]},"Colotis evagore":{"2019":[26],"2020":[41],"2021":[24,29,29,32,32,32],"2022":[30,30,30,30,30,31,31,31,32,33,33],"2023":[20,22,22,27],"2024":[20,33],"2025":[32,32]},"Colotis evenina":{"2022":[20,32,34],"2023":[22,22,23],"2025":[33]},"Colotis ione":{"2021":[24,27,29,32],"2022":[32,32],"2023":[22],"2024":[20,20,21,26]},"Colotis pallene":{"2025":[25,26]},"Colotis regina":{"2020":[38]},"Colotis spec.":{"2020":[40],"2021":[27,27,28,29],"2022":[24,30,31,32,32,32,32,34],"2023":[22,22],"2024":[24,26,27,27]},"Colotis vesta":{"2021":[21,22,22,24,24,27,28,29,29,29,29,30,30,32,35],"2023":[21,24,28,28,33],"2024":[19,20,24,27,27,31],"2025":[30,30,35]},"Cupidopsis jobates":{"2023":[22]},"Danaus chrysippus":{"2019":[18,28],"2021":[18,28,28],"2022":[24,33,34],"2023":[22,25,30],"2024":[20,24,24],"2025":[19,22,25,29,30,31]},"Deudorix antalus":{"2022":[32,32],"2023":[22,22,23,25,25]},"Deudorix dinochares":{"2022":[33,33,33]},"Deudorix diocles":{"2025":[18]},"Dixeia charina":{"2021":[30]},"Dixeia pigea":{"2019":[27,30],"2020":[35,41,41],"2021":[22,27,27,29,29,31,31,31,32,32,32,32,32,33,33,35],"2022":[22,23,24,25,26,26,28,30,32,33,33,33,33,33,34,34],"2023":[17,21,21,21,22,22,23,23,23,24,24,24,26,27,28,30,33,33],"2024":[19,21,21,24,32]},"Dixeia spilleri":{"2025":[33]},"Eagris nottoana":{"2022":[23],"2025":[25]},"Eicochrysops hippocrates":{"2019":[19],"2022":[17,18,19,20,23,23,30,33],"2023":[17,20,21,22],"2024":[20,20,20,20,21],"2025":[22,24]},"Eronia cleodora":{"2023":[20,20],"2024":[27],"2025":[30,33]},"Euchrysops osiris":{"2019":[19],"2021":[25]},"Eurema brigitta":{"2019":[20,23],"2020":[37],"2021":[22,24,32],"2022":[23,31,33],"2023":[20,20,20,28]},"Eurema desjardinsii":{"2025":[19,22,22,23,30,33,33]},"Eurema floricola":{"2023":[17]},"Eurema hecabe":{"2021":[30,30],"2023":[22,28],"2025":[25,32]},"Eurema regularis":{"2021":[22],"2023":[22,22,30,32,33],"2024":[20,31]},"Eurytela dryope":{"2023":[22],"2024":[20]},"Favonius quercus":{"2025":[19,22]},"Freyeria trochylus":{"2021":[18]},"Gegenes pumilio":{"2021":[27],"2022":[33]},"Gegenes spec.":{"2019":[21],"2021":[23],"2022":[28],"2023":[25,30]},"Gomalia elma":{"2022":[19,32],"2025":[19]},"Graphium antheus":{"2020":[37,41]},"Hamanumida daedalus":{"2019":[20],"2021":[17,21,22,27,29,32,33,34],"2022":[17,32],"2023":[19,21,23,23,25,26,27,30,30,33],"2024":[17,18,18,18,18,20,25,27],"2025":[20,21,22,25,25,34]},"Hemiolaus caeculus":{"2019":[28],"2020":[33],"2021":[18,22,28,30],"2022":[29,29,29,30,32,34],"2023":[22,25,26,30],"2024":[20,21,24],"2025":[22,35]},"Hypolimnas anthedon":{"2019":[46],"2020":[37],"2021":[16,16,24,30,33,33],"2022":[32],"2024":[44],"2025":[33]},"Hypolimnas misippus":{"2019":[21],"2022":[25,31],"2025":[19,30]},"Hypolycaena philippus":{"2021":[22,32],"2023":[21],"2024":[18],"2025":[18,19,22,25]},"Junonia elgiva":{"2025":[18,19,20,21,24,29,30,31,33]},"Junonia hierta":{"2019":[18,29],"2020":[35,40],"2021":[19,25,28,29,31,33],"2022":[18,19,22,23,27,30,31,33,33],"2023":[17,18,21,22,23,25,25,30,32,33],"2024":[21,25,27],"2025":[18,19,21,21,22,22,22,22,23,23,23,25,25,25,26,26,29,29,30,30,31,33,33]},"Junonia natalica":{"2019":[18,22,23,31],"2020":[37,38,41,41,42],"2021":[16,21,27,27,28,29,30,32,34,35],"2022":[18,19,23,25,30,32,34],"2023":[17,19,20,21,22,22,23,24,25,26,27,28,30,30],"2024":[17,17,18,20,20,24,24],"2025":[18,19,19,20,21,22,23,25,26,32,33]},"Junonia oenone":{"2019":[29],"2020":[35,41],"2021":[18,20,24,24,27,27,28,30,31,32,34],"2022":[19,26],"2024":[17,18,20,21,29],"2025":[19,20,21,22,22,22,23,24,25,29,30,30,33]},"Junonia terea":{"2019":[18,21,26,29],"2020":[37,42,42,42],"2021":[23,28,28,29,30,33,34,35],"2022":[17,17,17,19,20,22,23,23,23,24,26,27,29,29,30,30,31,33,33,33,33,34,34],"2023":[17,19,19,19,20,21,22,25,25,26,30,30,33],"2024":[18,19,20,20,20,20,21,29,31]},"Lachnocnema bibulus":{"2022":[23]},"Lachnoptera ayresii":{"2022":[23,27,28,29,29,30],"2023":[33]},"Lampides boeticus":{"2022":[25]},"Lepidochrysops patricia":{"2023":[19]},"Lepidoptera indet.":{"2019":[18,47],"2020":[41,41,41,42],"2021":[19,27,30,32,34,34],"2022":[17,22,24,27,28,31,31,32,32,33,33],"2023":[17,17,18,18,25,30],"2024":[18,24,24]},"Leptomyrina hirundo":{"2022":[33,33,34]},"Leptosia alcesta":{"2019":[18],"2021":[18,22,22,27,28,35],"2022":[18,25,27,28,32],"2023":[17,18,24,25,28,33],"2024":[17,19,20,21,24,26],"2025":[20,22,22,22,23,24,25,26,29,32,33,34]},"Leptotes pirithous":{"2025":[24,26,34]},"Leptotes pirithous-complex":{"2025":[22]},"Libythea labdaca laius":{"2019":[19]},"Melanitis leda":{"2019":[24,25,31,46,46],"2020":[38,40,41],"2021":[17,22,22,23,24,24,24,27,29,30,32,34,35],"2022":[28,28,32,33,34],"2023":[20,22,22,28,32,33],"2024":[31,32],"2025":[19,21,24,24,25,26,26,29,30,32,33,34]},"Mylothris agathina":{"2019":[18],"2021":[22,24,27,27,29,31,32],"2022":[23,24,27,28,30,30,31,32,33,33,33,33],"2023":[20,22,22,23,24,25,26,26,28,30,30],"2024":[24,27],"2025":[21,21,22,22,22,23,24,25,32,33,34]},"Myrina silenus":{"2019":[22]},"Nepheronia argia":{"2022":[30],"2024":[27]},"Nepheronia thalassina":{"2019":[22],"2021":[21,21,21,24,27,27,30],"2022":[22,23,26,27,30,32,32],"2023":[20,30,30,31],"2024":[20,24,24],"2025":[22,23,25,26,29,29,33,33,33]},"Neptis goochii":{"2023":[17]},"Neptis laeta":{"2019":[29],"2023":[19,20,21]},"Neptis saclava":{"2019":[19,22],"2020":[37],"2021":[16,17,21,27,28,29,30,31,32,33,35],"2022":[23,23,27,29,29,31,32,32,34],"2023":[18,21,21,22,22,28],"2024":[20,20],"2025":[21,22,30,34]},"Neptis trigonophora":{"2025":[25]},"Papilio constantinus":{"2020":[40]},"Papilio dardanus":{"2022":[20]},"Papilio demodocus":{"2019":[47],"2020":[41],"2022":[31],"2023":[17,23],"2025":[34,35]},"Papilio echerioides":{"2021":[33]},"Papilio nireus":{"2020":[41],"2025":[33]},"Parnara monasi":{"2025":[32,34]},"Pelopidas mathias":{"2025":[26]},"Pelopidas thrax":{"2025":[32]},"Phalanta eurytis":{"2023":[22]},"Phalanta phalantha":{"2021":[24],"2022":[22],"2023":[17,22,22,22,25,28,30],"2024":[21,22]},"Pinacopteryx eriphia":{"2021":[21,21,24,29,32,35],"2022":[26,29,30,31,31,34],"2023":[20,22,25,30,32],"2024":[24,27,28],"2025":[21,21,25,26,26,26,30,35]},"Precis antilope":{"2020":[35,37],"2023":[22,22,25]},"Precis archesia":{"2019":[22,29],"2021":[16,32],"2025":[19,19,22,22,26,30]},"Precis octavia":{"2019":[31],"2020":[35],"2021":[18,31],"2024":[20],"2025":[23,26,26]},"Precis tugela":{"2019":[18],"2021":[30,32],"2022":[30],"2023":[21,26],"2025":[19]},"Protogoniomorpha nebulosa":{"2025":[19]},"Protogoniomorpha parhassus":{"2019":[29],"2020":[35,37,37],"2021":[33,35,35],"2022":[23,27,28,31,33,34],"2025":[19,21,22,22,22,25,30,30,31,32,32,33,34,34]},"Pseudacraea boisduvalii":{"2021":[30],"2022":[20,33],"2023":[30],"2025":[30]},"Pseudacraea lucretia":{"2019":[20,20,23],"2020":[38],"2021":[19,21,22,25,28,29,29,30,31,32],"2022":[20,32,33],"2023":[17,19,21,21,21,22,23,23,23,24,26,26,30,33],"2024":[20,21,26,27],"2025":[19,20,21,22,22,25,25,30]},"Pseudonacaduba sichela":{"2023":[25]},"Salamis anacardii":{"2019":[46],"2020":[37],"2021":[16,16,21,21,25,27,27,28,30,31,32,32,33,34,35],"2022":[19,23,30,31,31,33],"2023":[17,21,21,21,22,22,22,22,23,23,23,25,25,26,26,27,30,30]},"Sarangesa motozi":{"2021":[23,28,29,30]},"Sarangesa seineri":{"2020":[38]},"Sevenia boisduvali":{"2019":[22,23,28,31],"2021":[16,28],"2022":[33],"2023":[24],"2025":[25]},"Sevenia natalensis":{"2025":[22,24]},"Spialia delagoae":{"2022":[31]},"Stephenia aglaonice":{"2025":[23,23,35]},"Stephenia natalica":{"2025":[21,32,34,34,35]},"Stephenia oncaea":{"2025":[22,25,26]},"Stugeta bowkeri":{"2024":[29]},"Tagiades flesus":{"2019":[22,23,23],"2020":[37],"2021":[27,27,27,27,27,30,31,32,35],"2022":[24,24,27],"2023":[21,21,24,25,26,30,30,33],"2024":[20,24,26],"2025":[22,24,25,26,31,33]},"Telchinia encedon":{"2019":[21],"2021":[24],"2022":[26,33],"2025":[25]},"Telchinia esebria":{"2022":[26,27,34],"2023":[19,19,19,23,24,25,28,28,28,30,30],"2024":[20,24,24],"2025":[19]},"Telchinia rahira":{"2025":[22]},"Telchinia serena":{"2019":[20,21,28],"2021":[16,16,16,17,17,22,23,24,24,24,27,27,27],"2022":[20,26,27,28,29,30,30,31,32,33,33,33],"2023":[18,18,20,21,22,23,24,24,26,30,32],"2024":[22],"2025":[19,21,22,25,26]},"Teracolus agoye":{"2025":[31]},"Teracolus eris":{"2021":[19,22,22,22,27,29],"2022":[28],"2023":[28,30]},"Terias brigitta":{"2025":[22,22,25]},"Terias brigitta brigitta":{"2025":[19,20,21,22,22]},"Terias desjardinsii":{"2025":[19,24,26]},"Terias floricola":{"2025":[24,26,26,30]},"Tildia acara":{"2025":[26]},"Tuxentius calice":{"2022":[33],"2025":[19,26]},"Tuxentius melaena":{"2021":[17,21,27,27,28,29,34],"2022":[32,34],"2023":[19,22,23,23,23,25,30,30,30],"2024":[20,20,20,24],"2025":[19,19,22,24,33]},"Vanessa cardui":{"2022":[19,23,24],"2025":[19]},"Ypthima impura":{"2020":[40]},"Zizeeria knysna":{"2021":[29],"2022":[26,33,33],"2023":[17,19],"2025":[25]},"Zizula hylax":{"2022":[32,33],"2025":[26]}};
+
+const YEARS = [2019,2020,2021,2022,2023,2024,2025];
+const YEAR_COLORS = ['#e07b54','#e8c34a','#5aad6e','#6baed6','#9e7ec8','#e05c7a','#4ab8b8'];
+const FAMILIES = ['Hesperiidae (Skippers)','Lycaenidae (Gossamer-winged butterflies)','Nymphalidae (Brush-footed Butterflies)','Papilionidae (Swallowtails)','Pieridae (Whites)'];
+const FAM_COLORS = ['#e07b54','#6baed6','#5aad6e','#e8c34a','#9e7ec8'];
+const FAMILY_DATA = {"2019": {"Hesperiidae (Skippers)": 5, "Lepidoptera": 1, "Lycaenidae (Gossamer-winged butterflies)": 5, "Nymphalidae (Brush-footed Butterflies)": 35, "Papilionidae (Swallowtails)": 1, "Pieridae (Whites)": 10}, "2020": {"Hesperiidae (Skippers)": 2, "Lepidoptera": 1, "Lycaenidae (Gossamer-winged butterflies)": 5, "Nymphalidae (Brush-footed Butterflies)": 28, "Papilionidae (Swallowtails)": 4, "Pieridae (Whites)": 8}, "2021": {"Hesperiidae (Skippers)": 7, "Lepidoptera": 1, "Lycaenidae (Gossamer-winged butterflies)": 11, "Nymphalidae (Brush-footed Butterflies)": 41, "Papilionidae (Swallowtails)": 1, "Pieridae (Whites)": 22}, "2022": {"Hesperiidae (Skippers)": 8, "Lepidoptera": 1, "Lycaenidae (Gossamer-winged butterflies)": 14, "Nymphalidae (Brush-footed Butterflies)": 32, "Papilionidae (Swallowtails)": 2, "Pieridae (Whites)": 22}, "2023": {"Hesperiidae (Skippers)": 4, "Lepidoptera": 1, "Lycaenidae (Gossamer-winged butterflies)": 15, "Nymphalidae (Brush-footed Butterflies)": 40, "Papilionidae (Swallowtails)": 1, "Pieridae (Whites)": 24}, "2024": {"Hesperiidae (Skippers)": 2, "Lepidoptera": 1, "Lycaenidae (Gossamer-winged butterflies)": 9, "Nymphalidae (Brush-footed Butterflies)": 27, "Papilionidae (Swallowtails)": 0, "Pieridae (Whites)": 19}, "2025": {"Hesperiidae (Skippers)": 9, "Lepidoptera": 0, "Lycaenidae (Gossamer-winged butterflies)": 14, "Nymphalidae (Brush-footed Butterflies)": 43, "Papilionidae (Swallowtails)": 2, "Pieridae (Whites)": 24}};
+
+const chartDefaults = {
+  color: '#d8e8da',
+  plugins: { legend: { labels: { color: '#7a9b82', font: { family: 'Lato' } } } },
+  scales: {
+    x: { ticks: { color: '#7a9b82' }, grid: { color: '#1c2b21' }, border: { color: '#2a3d2f' } },
+    y: { ticks: { color: '#7a9b82' }, grid: { color: '#1c2b21' }, border: { color: '#2a3d2f' } }
+  }
+};
+
+// ─── Chart 1: Richness ───
+new Chart(document.getElementById('richness-chart'), {
+  type: 'bar',
+  data: {
+    labels: YEARS,
+    datasets: [
+      {
+        label: 'Species',
+        data: YEARS.map(y => DATA.richness[y]),
+        backgroundColor: YEARS.map((_,i) => YEAR_COLORS[i]),
+        borderRadius: 2,
+        order: 2
+      },
+      {
+        label: 'Records',
+        data: YEARS.map(y => DATA.records[y]),
+        type: 'line',
+        borderColor: '#c8a84b',
+        backgroundColor: 'rgba(200,168,75,0.15)',
+        pointBackgroundColor: '#c8a84b',
+        tension: 0.3,
+        yAxisID: 'y2',
+        order: 1
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#7a9b82', font: { family: 'Lato' } } },
+      tooltip: { callbacks: {
+        afterBody: (items) => {
+          const yr = items[0].label;
+          const wkData = DATA.week_year.filter(d => d.year == yr);
+          const weeks = wkData.map(d => d.ioc_week);
+          if(!weeks.length) return '';
+          return `IOC weeks: ${Math.min(...weeks)}–${Math.max(...weeks)}`;
+        }
+      }}
+    },
+    scales: {
+      x: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+      y: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'}, title:{display:true,text:'Species',color:'#7a9b82'} },
+      y2: { position:'right', ticks:{color:'#c8a84b'}, grid:{display:false}, border:{color:'#2a3d2f'}, title:{display:true,text:'Records',color:'#c8a84b'} }
+    }
+  }
+});
+
+// ─── Chart 2a: Records ───
+new Chart(document.getElementById('records-chart'), {
+  type: 'bar',
+  data: {
+    labels: YEARS,
+    datasets: [{
+      label: 'Observation Records',
+      data: YEARS.map(y => DATA.records[y]),
+      backgroundColor: YEARS.map((_,i) => YEAR_COLORS[i]),
+      borderRadius: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend:{display:false} },
+    scales: {
+      x: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+      y: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'}, title:{display:true,text:'Records',color:'#7a9b82'} }
+    }
+  }
+});
+
+// ─── Chart 2b: Weeks covered ───
+const weekRanges = YEARS.map(y => {
+  const wks = DATA.week_year.filter(d => d.year === y).map(d => d.ioc_week);
+  return wks.length ? Math.max(...wks) - Math.min(...wks) + 1 : 0;
+});
+new Chart(document.getElementById('weeks-chart'), {
+  type: 'bar',
+  data: {
+    labels: YEARS,
+    datasets: [{
+      label: 'IOC Weeks Covered',
+      data: weekRanges,
+      backgroundColor: YEARS.map((_,i) => YEAR_COLORS[i]),
+      borderRadius: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend:{display:false} },
+    scales: {
+      x: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+      y: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'}, title:{display:true,text:'Weeks',color:'#7a9b82'} }
+    }
+  }
+});
+
+// ─── Chart 3: Family stacked ───
+new Chart(document.getElementById('family-chart'), {
+  type: 'bar',
+  data: {
+    labels: YEARS,
+    datasets: FAMILIES.map((fam,i) => ({
+      label: fam.replace(/ \(.*\)/,''),
+      data: YEARS.map(y => FAMILY_DATA[y][fam] || 0),
+      backgroundColor: FAM_COLORS[i],
+      borderRadius: 1
+    }))
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color:'#7a9b82', font:{family:'Lato'} } } },
+    scales: {
+      x: { stacked:true, ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+      y: { stacked:true, ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'}, title:{display:true,text:'Species',color:'#7a9b82'} }
+    }
+  }
+});
+
+// ─── Chart 4: Heatmap — drawn directly on canvas ───
+(function() {
+  const canvas = document.getElementById('heatmap-chart');
+  // Replace canvas with a div container for the custom heatmap
+  const parent = canvas.parentElement;
+  canvas.remove();
+
+  const MIN_WEEK = 16, MAX_WEEK = 48;
+  const totalWeeks = MAX_WEEK - MIN_WEEK + 1;
+  const CELL_W = 18, CELL_H = 34;
+  const PAD_LEFT = 52, PAD_TOP = 28, PAD_BOTTOM = 36, PAD_RIGHT = 16;
+  const W = PAD_LEFT + totalWeeks * CELL_W + PAD_RIGHT;
+  const H = PAD_TOP + YEARS.length * CELL_H + PAD_BOTTOM;
+
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  cvs.style.maxWidth = '100%';
+  cvs.style.display = 'block';
+  parent.appendChild(cvs);
+
+  // Tooltip overlay
+  const tip = document.createElement('div');
+  tip.style.cssText = 'position:fixed;background:#162019;border:1px solid #2a3d2f;color:#d8e8da;font:12px Lato,sans-serif;padding:6px 10px;border-radius:3px;pointer-events:none;display:none;z-index:999';
+  document.body.appendChild(tip);
+
+  // Build lookup
+  const lookup = {};
+  DATA.week_year.forEach(d => { lookup[`${d.year}_${d.ioc_week}`] = d.sci_species; });
+  const maxVal = Math.max(...DATA.week_year.map(d => d.sci_species));
+
+  // Year colours as RGB arrays
+  const COLS = [
+    [224,123,84],[232,195,74],[90,173,110],[107,174,214],[158,126,200],[224,92,122],[74,184,184]
+  ];
+
+  function draw() {
+    const ctx = cvs.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    ctx.fillStyle = '#162019';
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw cells
+    YEARS.forEach((yr, yi) => {
+      const [r,g,b] = COLS[yi];
+      const y0 = PAD_TOP + yi * CELL_H;
+
+      for (let wk = MIN_WEEK; wk <= MAX_WEEK; wk++) {
+        const v = lookup[`${yr}_${wk}`] || 0;
+        const x0 = PAD_LEFT + (wk - MIN_WEEK) * CELL_W;
+        const alpha = v > 0 ? 0.35 + (v / maxVal) * 0.65 : 0;
+
+        if (v > 0) {
+          ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.fillRect(x0 + 1, y0 + 2, CELL_W - 2, CELL_H - 4);
+        }
+
+        // Cell border
+        ctx.strokeStyle = 'rgba(42,61,47,0.5)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(x0 + 1, y0 + 2, CELL_W - 2, CELL_H - 4);
+
+        // Value label — show all non-zero values in white for contrast
+        if (v > 0) {
+          ctx.fillStyle = alpha > 0.6 ? 'rgba(255,255,255,0.95)' : `rgba(${r},${g},${b},1)`;
+          ctx.font = v >= 10 ? 'bold 8px "Source Code Pro", monospace' : '7px "Source Code Pro", monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(v, x0 + CELL_W/2, y0 + CELL_H/2);
+        }
+      }
+
+      // Year label
+      ctx.fillStyle = `rgba(${COLS[yi][0]},${COLS[yi][1]},${COLS[yi][2]},0.9)`;
+      ctx.font = '11px "Source Code Pro", monospace';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(yr, PAD_LEFT - 6, y0 + CELL_H/2);
+    });
+
+    // Week axis labels
+    ctx.fillStyle = '#7a9b82';
+    ctx.font = '9px "Source Code Pro", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let wk = MIN_WEEK; wk <= MAX_WEEK; wk++) {
+      if (wk % 4 === 0) {
+        const x0 = PAD_LEFT + (wk - MIN_WEEK) * CELL_W + CELL_W/2;
+        ctx.fillText(`W${wk}`, x0, PAD_TOP + YEARS.length * CELL_H + 6);
+      }
+    }
+
+    // Legend
+    const legX = PAD_LEFT;
+    const legY = H - 14;
+    ctx.fillStyle = '#7a9b82';
+    ctx.font = '9px Lato,sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Species/week:', legX, legY);
+    const steps = [0, 5, 10, 15, 20, 25, 31];
+    steps.forEach((v, si) => {
+      const lx = legX + 85 + si * 38;
+      const alpha = v > 0 ? 0.18 + (v / maxVal) * 0.82 : 0.05;
+      ctx.fillStyle = `rgba(90,173,110,${alpha})`;
+      ctx.fillRect(lx, legY - 6, 28, 12);
+      ctx.strokeStyle = 'rgba(42,61,47,0.8)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(lx, legY - 6, 28, 12);
+      ctx.fillStyle = '#7a9b82';
+      ctx.font = '8px "Source Code Pro",monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(v === 0 ? '0' : v+'', lx + 14, legY);
+    });
+  }
+
+  draw();
+
+  // Tooltip interaction
+  cvs.addEventListener('mousemove', (e) => {
+    const rect = cvs.getBoundingClientRect();
+    const scaleX = cvs.width / rect.width;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleX;
+
+    const col = Math.floor((mx - PAD_LEFT) / CELL_W);
+    const row = Math.floor((my - PAD_TOP) / CELL_H);
+
+    if (col >= 0 && col < totalWeeks && row >= 0 && row < YEARS.length) {
+      const wk = col + MIN_WEEK;
+      const yr = YEARS[row];
+      const v = lookup[`${yr}_${wk}`] || 0;
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = (e.clientY - 10) + 'px';
+      tip.innerHTML = `<strong>${yr}</strong> · Week ${wk}<br>${v > 0 ? `<span style="color:#5aad6e">${v} species</span>` : '<span style="color:#2a3d2f">no data</span>'}`;
+    } else {
+      tip.style.display = 'none';
+    }
+  });
+  cvs.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+})();
+
+// ─── Matrix: Presence/Absence ───
+const FAMILY_MAP = {"Acleros mackenii": "Hesperiidae", "Acraea acara": "Nymphalidae", "Acraea aganice": "Nymphalidae", "Acraea aglaonice": "Nymphalidae", "Acraea anemosa": "Nymphalidae", "Acraea axina": "Nymphalidae", "Acraea caldarena": "Nymphalidae", "Acraea natalica": "Nymphalidae", "Acraea neobule": "Nymphalidae", "Acraea oncaea": "Nymphalidae", "Afrodryas leda": "Pieridae", "Afrogegenes letterstedti": "Hesperiidae", "Amauris albimaculata": "Nymphalidae", "Amauris echeria": "Nymphalidae", "Amauris niavius": "Nymphalidae", "Andronymus neander": "Hesperiidae", "Anthene amarah": "Lycaenidae", "Anthene definita": "Lycaenidae", "Anthene princeps": "Lycaenidae", "Anthene spec.": "Lycaenidae", "Axiocerses amanga": "Lycaenidae", "Axiocerses coalescens": "Lycaenidae", "Axiocerses tjoane": "Lycaenidae", "Azanus jesous": "Lycaenidae", "Azanus mirza": "Lycaenidae", "Azanus moriqua": "Lycaenidae", "Azanus natalensis": "Lycaenidae", "Belenois aurota": "Pieridae", "Belenois creona": "Pieridae", "Belenois gidica": "Pieridae", "Belenois zochalia": "Pieridae", "Bicyclus anynana": "Nymphalidae", "Bicyclus ena": "Nymphalidae", "Bicyclus safitza": "Nymphalidae", "Borbo borbonica": "Hesperiidae", "Borbo fatuellus": "Hesperiidae", "Borbo gemella": "Hesperiidae", "Borbo spec.": "Hesperiidae", "Brakefieldia perspicua": "Nymphalidae", "Byblia anvatara": "Nymphalidae", "Byblia ilithyia": "Nymphalidae", "Byblia spec.": "Pieridae", "Cacyreus lingeus": "Lycaenidae", "Cacyreus marshalli": "Lycaenidae", "Catopsilia florella": "Pieridae", "Charaxes achaemenes": "Nymphalidae", "Charaxes brutus": "Nymphalidae", "Charaxes candiope": "Nymphalidae", "Charaxes druceanus": "Nymphalidae", "Charaxes ethalion": "Nymphalidae", "Charaxes jahlusa": "Nymphalidae", "Charaxes jasius": "Nymphalidae", "Charaxes marieps": "Nymphalidae", "Charaxes phaeus": "Nymphalidae", "Charaxes spec.": "Nymphalidae", "Charaxes vansoni": "Nymphalidae", "Charaxes varanes": "Nymphalidae", "Charaxes zoolina": "Nymphalidae", "Cigaritis natalensis": "Lycaenidae", "Colotis annae": "Pieridae", "Colotis antevippe": "Pieridae", "Colotis euippe": "Pieridae", "Colotis evagore": "Pieridae", "Colotis evenina": "Pieridae", "Colotis ione": "Pieridae", "Colotis pallene": "Pieridae", "Colotis regina": "Pieridae", "Colotis spec.": "Pieridae", "Colotis vesta": "Pieridae", "Cupidopsis jobates": "Lycaenidae", "Danaus chrysippus": "Nymphalidae", "Deudorix antalus": "Lycaenidae", "Deudorix dinochares": "Lycaenidae", "Deudorix diocles": "Lycaenidae", "Dixeia charina": "Pieridae", "Dixeia pigea": "Pieridae", "Dixeia spilleri": "Pieridae", "Eagris nottoana": "Hesperiidae", "Eicochrysops hippocrates": "Lycaenidae", "Eronia cleodora": "Pieridae", "Euchrysops osiris": "Lycaenidae", "Eurema brigitta": "Pieridae", "Eurema desjardinsii": "Pieridae", "Eurema floricola": "Pieridae", "Eurema hecabe": "Pieridae", "Eurema regularis": "Pieridae", "Eurytela dryope": "Nymphalidae", "Favonius quercus": "Lycaenidae", "Freyeria trochylus": "Lycaenidae", "Gegenes pumilio": "Hesperiidae", "Gegenes spec.": "Hesperiidae", "Gomalia elma": "Hesperiidae", "Graphium antheus": "Papilionidae", "Hamanumida daedalus": "Nymphalidae", "Hemiolaus caeculus": "Lycaenidae", "Hypolimnas anthedon": "Nymphalidae", "Hypolimnas misippus": "Nymphalidae", "Hypolycaena philippus": "Lycaenidae", "Junonia elgiva": "Nymphalidae", "Junonia hierta": "Nymphalidae", "Junonia natalica": "Nymphalidae", "Junonia oenone": "Nymphalidae", "Junonia terea": "Nymphalidae", "Lachnocnema bibulus": "Lycaenidae", "Lachnoptera ayresii": "Nymphalidae", "Lampides boeticus": "Lycaenidae", "Lepidochrysops patricia": "Lycaenidae", "Leptomyrina hirundo": "Lycaenidae", "Leptosia alcesta": "Pieridae", "Leptotes pirithous": "Lycaenidae", "Leptotes pirithous-complex": "Lycaenidae", "Libythea labdaca laius": "Nymphalidae", "Melanitis leda": "Nymphalidae", "Mylothris agathina": "Pieridae", "Myrina silenus": "Lycaenidae", "Nepheronia argia": "Pieridae", "Nepheronia thalassina": "Pieridae", "Neptis goochii": "Nymphalidae", "Neptis laeta": "Nymphalidae", "Neptis saclava": "Nymphalidae", "Neptis trigonophora": "Nymphalidae", "Papilio constantinus": "Papilionidae", "Papilio dardanus": "Papilionidae", "Papilio demodocus": "Papilionidae", "Papilio echerioides": "Papilionidae", "Papilio nireus": "Papilionidae", "Parnara monasi": "Hesperiidae", "Pelopidas mathias": "Hesperiidae", "Pelopidas thrax": "Hesperiidae", "Phalanta eurytis": "Nymphalidae", "Phalanta phalantha": "Nymphalidae", "Pinacopteryx eriphia": "Pieridae", "Precis antilope": "Nymphalidae", "Precis archesia": "Nymphalidae", "Precis octavia": "Nymphalidae", "Precis tugela": "Nymphalidae", "Protogoniomorpha nebulosa": "Nymphalidae", "Protogoniomorpha parhassus": "Nymphalidae", "Pseudacraea boisduvalii": "Nymphalidae", "Pseudacraea lucretia": "Nymphalidae", "Pseudonacaduba sichela": "Lycaenidae", "Salamis anacardii": "Nymphalidae", "Sarangesa motozi": "Hesperiidae", "Sarangesa seineri": "Hesperiidae", "Sevenia boisduvali": "Nymphalidae", "Sevenia natalensis": "Nymphalidae", "Spialia delagoae": "Hesperiidae", "Stephenia aglaonice": "Nymphalidae", "Stephenia natalica": "Nymphalidae", "Stephenia oncaea": "Nymphalidae", "Stugeta bowkeri": "Lycaenidae", "Tagiades flesus": "Hesperiidae", "Telchinia encedon": "Nymphalidae", "Telchinia esebria": "Nymphalidae", "Telchinia rahira": "Nymphalidae", "Telchinia serena": "Nymphalidae", "Teracolus agoye": "Pieridae", "Teracolus eris": "Pieridae", "Terias brigitta": "Pieridae", "Terias brigitta brigitta": "Pieridae", "Terias desjardinsii": "Pieridae", "Terias floricola": "Pieridae", "Tildia acara": "Nymphalidae", "Tuxentius calice": "Lycaenidae", "Tuxentius melaena": "Lycaenidae", "Vanessa cardui": "Nymphalidae", "Ypthima impura": "Nymphalidae", "Zizeeria knysna": "Lycaenidae", "Zizula hylax": "Lycaenidae"};
+const FAM_ORDER = ['Hesperiidae','Lycaenidae','Nymphalidae','Papilionidae','Pieridae'];
+const FAM_ACCENT = {'Hesperiidae':'#e07b54','Lycaenidae':'#6baed6','Nymphalidae':'#5aad6e','Papilionidae':'#e8c34a','Pieridae':'#9e7ec8'};
+
+let showSpec = true;
+let viewMode = 'both'; // 'both' | 'presence' | 'absence'
+
+function toggleSpec() {
+  showSpec = !showSpec;
+  const btn = document.getElementById('toggle-spec');
+  btn.textContent = showSpec ? 'spec. ON' : 'spec. OFF';
+  btn.style.color = showSpec ? 'var(--gold)' : 'var(--text-dim)';
+  btn.style.borderColor = showSpec ? 'var(--gold)' : 'var(--border)';
+  buildMatrix();
+}
+
+function toggleView() {
+  const modes = ['both','presence','absence'];
+  const labels = ['VIEW: PRESENCE & ABSENCE','VIEW: PRESENCE ONLY','VIEW: ABSENCE ONLY'];
+  viewMode = modes[(modes.indexOf(viewMode) + 1) % 3];
+  const btn = document.getElementById('toggle-view');
+  btn.textContent = labels[modes.indexOf(viewMode)];
+  btn.style.color = viewMode === 'both' ? 'var(--text-dim)' : 'var(--gold)';
+  btn.style.borderColor = viewMode === 'both' ? 'var(--border)' : 'var(--gold)';
+  buildMatrix();
+}
+
+function buildMatrix() {
+  const search = document.getElementById('sp-search').value.toLowerCase();
+  const absentYr = document.getElementById('absent-year-filter').value;
+  const minYrs = parseInt(document.getElementById('min-years-filter').value);
+  const famFilter = document.getElementById('family-filter').value;
+
+  let filtered = Object.entries(ABSENT_DATA).filter(([sp, d]) => {
+    if(d.seen.length < minYrs) return false;
+    if(!showSpec && sp.toLowerCase().includes('spec.')) return false;
+    if(search && !sp.toLowerCase().includes(search)) return false;
+    if(absentYr && !d.absent.map(String).includes(absentYr)) return false;
+    if(famFilter && FAMILY_MAP[sp] !== famFilter) return false;
+    // View mode filter
+    if(viewMode === 'presence') {
+      // Only show species present in ALL surveyed years (no absences)
+      if(d.absent.length > 0) return false;
+    }
+    if(viewMode === 'absence') {
+      // Only show species absent in at least one year
+      if(d.absent.length === 0) return false;
+    }
+    return true;
+  });
+
+  const byFamily = {};
+  FAM_ORDER.forEach(f => byFamily[f] = []);
+  filtered.forEach(entry => {
+    const fam = FAMILY_MAP[entry[0]] || 'Other';
+    if(!byFamily[fam]) byFamily[fam] = [];
+    byFamily[fam].push(entry);
+  });
+  FAM_ORDER.forEach(f => byFamily[f].sort((a,b) => a[0].localeCompare(b[0])));
+
+  // Count totals per family and grand total
+  const famTotals = {};
+  FAM_ORDER.forEach(f => famTotals[f] = byFamily[f].length);
+  const grandTotal = filtered.length;
+
+  let html = `<table class="matrix"><thead><tr><th class="sp-col">Species</th>`;
+  YEARS.forEach(y => html += `<th>${y}</th>`);
+  html += `</tr></thead><tbody>`;
+
+  let anyRows = false;
+  FAM_ORDER.forEach(fam => {
+    const rows = byFamily[fam];
+    if(!rows || rows.length === 0) return;
+    anyRows = true;
+    const col = FAM_ACCENT[fam] || '#7a9b82';
+    html += `<tr><td colspan="${YEARS.length + 1}" style="padding:10px 4px 4px;font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:${col};border-bottom:1px solid ${col}44;border-top:1px solid #1c2b21">${fam} <span style="opacity:0.5;font-size:9px">(${rows.length})</span></td></tr>`;
+    rows.forEach(([sp, d]) => {
+      html += `<tr><td class="sp-name">${sp.includes('spec.') ? '<span style="color:var(--text-dim);font-style:italic">' + sp + '</span>' : sp}</td>`;
+      YEARS.forEach(y => {
+        const present = d.seen.includes(y);
+        if(viewMode === 'presence') {
+          html += `<td><span class="dot-present">●</span></td>`;
+        } else if(viewMode === 'absence') {
+          html += `<td><span class="dot-absent">·</span></td>`;
+        } else {
+          html += `<td><span class="${present?'dot-present':'dot-absent'}">${present?'●':'·'}</span></td>`;
+        }
+      });
+      html += `</tr>`;
+    });
+  });
+
+  // Grand total footer row
+  if(anyRows) {
+    html += `<tr><td colspan="${YEARS.length + 1}" style="padding:8px 4px 4px;font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:1px;color:var(--gold);border-top:1px solid var(--gold)44;text-align:right">
+      TOTAL DISPLAYED: <strong style="color:var(--gold-light);font-size:12px">${grandTotal}</strong> species
+      ${famFilter ? '' : ' &nbsp;|&nbsp; ' + FAM_ORDER.filter(f => famTotals[f] > 0).map(f => {
+        const c = FAM_ACCENT[f];
+        return `<span style="color:${c}">${f.replace('idae','')}: ${famTotals[f]}</span>`;
+      }).join(' &nbsp; ')}
+    </td></tr>`;
+  }
+
+  html += `</tbody></table>`;
+  if(!anyRows) html = '<div style="color:var(--text-dim);font-size:12px;padding:20px">No species match the current filters.</div>';
+  document.getElementById('matrix-container').innerHTML = html;
+
+  // Update floating total badge
+  const badge = document.getElementById('matrix-total');
+  badge.textContent = anyRows ? grandTotal + ' species shown' : '';
+}
+
+['sp-search','absent-year-filter','min-years-filter','family-filter'].forEach(id =>
+  document.getElementById(id).addEventListener('change', buildMatrix)
+);
+['sp-search'].forEach(id =>
+  document.getElementById(id).addEventListener('input', buildMatrix)
+);
+buildMatrix();
+
+// ─── Chart 6: Species × week ───
+(function(){
+  const selector = document.getElementById('species-selector');
+  const spList = Object.keys(SPECIES_WEEKS).sort();
+  spList.forEach(sp => {
+    const opt = document.createElement('option');
+    opt.value = sp; opt.textContent = sp;
+    selector.appendChild(opt);
+  });
+
+  let chart = null;
+
+  function drawSpeciesChart(sp) {
+    const byYear = SPECIES_WEEKS[sp];
+    const datasets = Object.entries(byYear).map(([yr, weeks]) => {
+      const yi = YEARS.indexOf(parseInt(yr));
+      const col = YEAR_COLORS[yi] || '#999';
+      return {
+        label: yr,
+        data: [...new Set(weeks)].sort((a,b)=>a-b).map(w => ({x: w, y: parseInt(yr)})),
+        backgroundColor: col,
+        borderColor: col,
+        pointRadius: 10,
+        pointHoverRadius: 13
+      };
+    });
+
+    const ctx = document.getElementById('species-week-chart');
+    if(chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels:{color:'#7a9b82',font:{family:'Lato'}} },
+          tooltip: { callbacks: {
+            title: i => `Week ${i[0].raw.x}`,
+            label: i => `${i.dataset.label} — Week ${i.raw.x}`
+          }}
+        },
+        scales: {
+          x: {
+            min: 16, max: 48,
+            title:{display:true,text:'IOC Week',color:'#7a9b82'},
+            ticks:{color:'#7a9b82', stepSize:1, callback: v => v%2===0?v:''},
+            grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'}
+          },
+          y: {
+            min: 2018.5, max: 2025.5,
+            ticks:{color:'#7a9b82', stepSize:1, callback: v => Number.isInteger(v)?v:''},
+            grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'}
+          }
+        }
+      }
+    });
+
+    const d = ABSENT_DATA[sp];
+    const note = d
+      ? `Seen in: ${d.seen.join(', ')} | Absent in: ${d.absent.length ? d.absent.join(', ') : 'none'}`
+      : `Seen in all 7 seasons`;
+    document.getElementById('species-week-note').textContent = note;
+  }
+
+  selector.addEventListener('change', () => drawSpeciesChart(selector.value));
+  if(spList.length) { selector.value = spList[0]; drawSpeciesChart(spList[0]); }
+})();
+
+// ─── Chart 7: Comparable weeks ───
+(function() {
+  const WEEK_DATA = {"18": {"2019": 12, "2020": 0, "2021": 12, "2022": 6, "2023": 7, "2024": 12, "2025": 8}, "19": {"2019": 6, "2020": 0, "2021": 9, "2022": 10, "2023": 16, "2024": 7, "2025": 34}, "20": {"2019": 9, "2020": 0, "2021": 2, "2022": 10, "2023": 20, "2024": 31, "2025": 12}, "21": {"2019": 9, "2020": 0, "2021": 17, "2022": 3, "2023": 23, "2024": 18, "2025": 20}, "22": {"2019": 13, "2020": 0, "2021": 17, "2022": 10, "2023": 41, "2024": 2, "2025": 39}, "23": {"2019": 6, "2020": 0, "2021": 8, "2022": 21, "2023": 24, "2024": 0, "2025": 13}, "24": {"2019": 2, "2020": 0, "2021": 20, "2022": 9, "2023": 18, "2024": 25, "2025": 17}, "25": {"2019": 6, "2020": 0, "2021": 6, "2022": 8, "2023": 29, "2024": 3, "2025": 31}, "26": {"2019": 3, "2020": 0, "2021": 3, "2022": 14, "2023": 17, "2024": 7, "2025": 29}, "27": {"2019": 1, "2020": 0, "2021": 26, "2022": 21, "2023": 10, "2024": 13, "2025": 0}, "28": {"2019": 4, "2020": 0, "2021": 20, "2022": 15, "2023": 17, "2024": 1, "2025": 0}, "29": {"2019": 7, "2020": 0, "2021": 27, "2022": 8, "2023": 2, "2024": 5, "2025": 13}, "30": {"2019": 2, "2020": 0, "2021": 25, "2022": 23, "2023": 29, "2024": 0, "2025": 23}, "31": {"2019": 5, "2020": 0, "2021": 14, "2022": 18, "2023": 1, "2024": 5, "2025": 9}, "32": {"2019": 0, "2020": 0, "2021": 29, "2022": 25, "2023": 6, "2024": 5, "2025": 14}, "33": {"2019": 0, "2020": 1, "2021": 17, "2022": 32, "2023": 15, "2024": 2, "2025": 20}};
+  const weeks = Object.keys(WEEK_DATA).map(Number).sort((a,b)=>a-b);
+  const labels = weeks.map(w => 'Wk ' + w);
+
+  // Line chart: one line per year, only plot if value > 0 or year was active that week
+  // 2020 excluded (only wk33 = 1 species, barely present)
+  const activeYears = [2019,2021,2022,2023,2024,2025];
+
+  const datasets = activeYears.map((yr, i) => {
+    const yri = YEARS.indexOf(yr);
+    const col = YEAR_COLORS[yri];
+    return {
+      label: String(yr),
+      data: weeks.map(wk => {
+        const v = WEEK_DATA[wk][yr];
+        return v > 0 ? v : null;  // null = gap in line
+      }),
+      borderColor: col,
+      backgroundColor: col + '22',
+      pointBackgroundColor: col,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      tension: 0.3,
+      spanGaps: false
+    };
+  });
+
+  // Add 2020 as a special dashed line
+  datasets.push({
+    label: '2020 (lockdown)',
+    data: weeks.map(wk => { const v = WEEK_DATA[wk][2020]; return v > 0 ? v : null; }),
+    borderColor: YEAR_COLORS[1],
+    borderDash: [4,4],
+    pointBackgroundColor: YEAR_COLORS[1],
+    pointRadius: 4,
+    tension: 0.3,
+    spanGaps: false
+  });
+
+  new Chart(document.getElementById('comparable-weeks-chart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color:'#7a9b82', font:{ family:'Lato' } } },
+        tooltip: {
+          callbacks: {
+            title: items => `IOC ${items[0].label}`,
+            label: item => item.raw !== null ? `${item.dataset.label}: ${item.raw} species` : `${item.dataset.label}: not surveyed`
+          }
+        }
+      },
+      scales: {
+        x: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+        y: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'}, title:{display:true,text:'Species observed',color:'#7a9b82'}, min:0 }
+      }
+    }
+  });
+
+  // Table
+  let th = `<table class="matrix"><thead><tr><th class="sp-col" style="min-width:60px">Week</th>`;
+  activeYears.forEach((y,i) => {
+    const col = YEAR_COLORS[YEARS.indexOf(y)];
+    th += `<th style="color:${col}">${y}</th>`;
+  });
+  th += `<th style="color:#c8a84b">Avg</th><th style="color:#c8a84b">Max</th></tr></thead><tbody>`;
+
+  weeks.forEach(wk => {
+    const vals = activeYears.map(y => WEEK_DATA[wk][y]);
+    const nonZero = vals.filter(v => v > 0);
+    const avg = nonZero.length ? (nonZero.reduce((a,b)=>a+b,0)/nonZero.length).toFixed(1) : '–';
+    const max = nonZero.length ? Math.max(...nonZero) : '–';
+    th += `<tr><td style="font-family:'Source Code Pro',monospace;color:var(--gold);font-size:11px">Wk ${wk}</td>`;
+    vals.forEach((v,i) => {
+      const col = YEAR_COLORS[YEARS.indexOf(activeYears[i])];
+      const bg = v > 0 ? `background:${col}22` : '';
+      th += `<td style="${bg};text-align:center;font-family:'Source Code Pro',monospace;font-size:11px;color:${v>0?col:'#2a3d2f'}">${v > 0 ? v : '·'}</td>`;
+    });
+    th += `<td style="color:#c8a84b;text-align:center;font-size:11px">${avg}</td>`;
+    th += `<td style="color:#c8a84b;text-align:center;font-size:11px">${max}</td>`;
+    th += `</tr>`;
+  });
+  th += `</tbody></table>`;
+  document.getElementById('comparable-table').innerHTML = th;
+})();
+</script>
+</body>
+</html>

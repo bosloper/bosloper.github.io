@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rainfall — Blyderivier Botaniese Reservaat 2000–2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1a14;
+    --surface: #162019;
+    --surface2: #1c2b21;
+    --border: #2a3d2f;
+    --gold: #c8a84b;
+    --gold-light: #e2c97e;
+    --text: #d8e8da;
+    --text-dim: #7a9b82;
+    --blue: #6baed6;
+    --blue-light: #9ecae1;
+    --green: #5aad6e;
+    --orange: #e07b54;
+    --red: #e05c7a;
+    --mean-line: #e2c97e;
+    --drought: #e05c7a;
+    --wet: #6baed6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; font-weight: 300; line-height: 1.6; }
+
+  header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0a1510 0%, var(--bg) 100%);
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content: '🌧';
+    position: absolute; right: 40px; top: 24px;
+    font-size: 80px; opacity: 0.08;
+  }
+  .subtitle { font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(22px,4vw,40px); font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 8px; }
+  h1 em { color: var(--gold-light); font-style: italic; }
+  .meta { font-size: 13px; color: var(--text-dim); margin-top: 10px; }
+
+  .stats-bar { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .stat { flex: 1; min-width: 120px; padding: 20px 28px; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 30px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 4px; padding: 16px 24px; background: var(--surface2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  nav a { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; padding: 6px 14px; border: 1px solid transparent; border-radius: 2px; transition: all 0.2s; }
+  nav a:hover { color: var(--gold); border-color: var(--gold); }
+
+  .container { max-width: 1300px; margin: 0 auto; padding: 40px 24px; display: flex; flex-direction: column; gap: 48px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold-light); margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .section-note { font-size: 12px; color: var(--text-dim); margin-bottom: 20px; font-style: italic; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 28px; }
+  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .chart-grid-2 { grid-template-columns: 1fr; } .stat { min-width: 50%; } }
+
+  /* Table */
+  table.data-table { border-collapse: collapse; width: 100%; font-family: 'Source Code Pro', monospace; font-size: 11px; }
+  table.data-table th { padding: 8px 10px; color: var(--text-dim); text-align: center; border-bottom: 1px solid var(--border); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  table.data-table th.left { text-align: left; }
+  table.data-table td { padding: 5px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 11px; }
+  table.data-table td.season-col { text-align: left; color: var(--gold); font-weight: 600; }
+  table.data-table tr.drought-row td { background: rgba(224,92,122,0.07); }
+  table.data-table tr.wet-row td { background: rgba(107,174,214,0.07); }
+  table.data-table tr.survey-row td { border-left: 2px solid var(--green); }
+  .table-wrap { overflow-x: auto; }
+
+  footer { text-align: center; padding: 30px; font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); letter-spacing: 1px; }
+
+  .insight-box { background: var(--surface2); border-left: 3px solid var(--gold); padding: 14px 18px; margin-top: 16px; font-size: 12px; color: var(--text-dim); line-height: 1.7; }
+  .insight-box strong { color: var(--gold-light); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="subtitle">Climate Record · Citizen Science · Blyde River Canyon</div>
+  <h1>Rainfall at Blyderivier<br><em>Botaniese Reservaat, Mpumalanga</em></h1>
+  <div class="meta">Station record · August 2000 – April 2026 · Monthly totals (mm)</div>
+  <div class="meta" style="margin-top:8px;color:var(--gold-light)">Data recorded by <strong>Johan (Pine) Pienaar</strong> · Blyderivier Botaniese Reservaat</div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">578</div><div class="stat-label">Mean mm/year</div></div>
+  <div class="stat"><div class="stat-num">1,003</div><div class="stat-label">Wettest season (2004/05)</div></div>
+  <div class="stat"><div class="stat-num">338</div><div class="stat-label">Driest season (2003/04)</div></div>
+  <div class="stat"><div class="stat-num">135</div><div class="stat-label">Mean Jan (mm) — peak</div></div>
+  <div class="stat"><div class="stat-num">25</div><div class="stat-label">Complete seasons</div></div>
+</div>
+
+<nav>
+  <a href="#annual">Annual Totals</a>
+  <a href="#seasonal">Seasonal Profile</a>
+  <a href="#monthly-all">All Months</a>
+  <a href="#context">Survey Context</a>
+  <a href="#table">Full Data Table</a>
+</nav>
+
+<div class="container">
+
+  <!-- CHART 1: Annual totals bar -->
+  <section id="annual">
+    <div class="section-title">Annual Rainfall Totals by Season</div>
+    <div class="section-note">August–July rainfall seasons 2000/01 to 2024/25. Gold dashed line = long-term mean (578 mm). Red = below 450 mm (drought threshold). Blue = above 700 mm (wet season).</div>
+    <div class="chart-card">
+      <canvas id="annual-chart" height="160"></canvas>
+    </div>
+    <div class="insight-box">
+      <strong>Key patterns:</strong> Rainfall is highly variable, ranging from 338 mm (2003/04) to 1,003 mm (2004/05) — nearly a 3× difference between extremes. Four seasons fell below 450 mm: 2001/02, 2003/04, 2006/07, and 2018/19. The 2023/24 season (491 mm) — coinciding with the low butterfly year — was below the long-term mean but not in the extreme drought category, suggesting that seasonal <em>distribution</em> rather than total may explain the observed butterfly scarcity.
+    </div>
+  </section>
+
+  <!-- CHART 2: Monthly profile -->
+  <section id="seasonal">
+    <div class="section-title">Mean Monthly Rainfall Profile</div>
+    <div class="section-note">Average rainfall per calendar month across all complete seasons (2000/01–2024/25). The rainy season runs November–April, peaking sharply in January.</div>
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <canvas id="monthly-avg-chart" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <canvas id="monthly-pct-chart" height="200"></canvas>
+      </div>
+    </div>
+    <div class="insight-box">
+      <strong>Seasonal structure:</strong> 96% of annual rainfall falls in the October–April window. January alone contributes ~22% of the annual total on average. The dry season (May–September) is reliable — fewer than 37 mm on average across five months combined. This aligns closely with the butterfly survey window (approximately IOC weeks 17–35 = late April to early September), which spans the dry season and the transition into it.
+    </div>
+  </section>
+
+  <!-- CHART 3: Monthly values all years heatmap -->
+  <section id="monthly-all">
+    <div class="section-title">Monthly Rainfall — All Seasons</div>
+    <div class="section-note">Colour intensity reflects rainfall amount per month. Reveals inter-annual variability within months, and highlights individual extreme events.</div>
+    <div class="chart-card" id="heatmap-container">
+      <!-- drawn by canvas below -->
+    </div>
+  </section>
+
+  <!-- CHART 4: Survey context -->
+  <section id="context">
+    <div class="section-title">Rainfall in Butterfly Survey Years (2019–2025)</div>
+    <div class="section-note">Monthly rainfall for the seven butterfly survey seasons, shown as overlapping lines. The survey window (approx. IOC weeks 17–35, roughly late April to early September) is highlighted.</div>
+    <div class="chart-card">
+      <canvas id="survey-chart" height="200"></canvas>
+    </div>
+    <div class="insight-box">
+      <strong>2023/24 in context:</strong> Total season rainfall was 491.5 mm — 15% below the long-term mean. More significantly, the October–December 2023 period was unusually dry (just 101 mm combined vs. a mean of 225 mm), potentially impacting larval food plants and adult nectar sources during the critical pre-survey buildup period. The subsequent butterfly season (IOC weeks 17–44, 2024) showed the lowest species count and record count of any high-effort year, consistent with a lag effect from the preceding dry season.
+    </div>
+  </section>
+
+  <!-- Full data table -->
+  <section id="table">
+    <div class="section-title">Complete Monthly Rainfall Table</div>
+    <div class="section-note">All seasons. <span style="color:var(--red)">Red rows</span> = below 450 mm total. <span style="color:var(--blue)">Blue rows</span> = above 700 mm. <span style="color:var(--green)">Green border left</span> = butterfly survey seasons (2019–2025).</div>
+    <div class="chart-card">
+      <div class="table-wrap" id="table-container"></div>
+    </div>
+  </section>
+
+</div>
+
+<div style="max-width:1300px;margin:0 auto;padding:0 24px 40px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:24px 28px">
+    <div style="font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Data Attribution &amp; Acknowledgement</div>
+    <p style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:10px">
+      The rainfall record presented in this dashboard was compiled by <strong style="color:var(--gold-light)">Johan (Pine) Pienaar</strong>
+      of the <strong style="color:var(--gold-light)">Blyderivier Botaniese Reservaat</strong>, Mpumalanga.
+      The Reservaat lies immediately adjacent to the Blyde River Canyon Nature Reserve — neighbours separated only by a provincial boundary fence,
+      both situated on the banks of the same river. Mr Pienaar recorded daily precipitation at the station and summarised the data as monthly totals,
+      maintaining this record with meticulous care from 1999 through to 2026 — a period of more than 25 years.
+    </p>
+    <p style="font-size:13px;color:var(--text-dim);line-height:1.8;margin-bottom:10px">
+      This dataset was kindly made available through the assistance of <strong style="color:var(--text)">Eugene Fourie</strong>,
+      a resident of the same estate, who facilitated contact between the observer and Mr Pienaar in April 2026.
+    </p>
+    <p style="font-size:12px;color:var(--text-dim);line-height:1.8">
+      Long-term local rainfall records of this quality and continuity are rare and invaluable for ecological research.
+      The Swadini butterfly survey analysis presented alongside this data would not have been possible without
+      Mr Pienaar's dedication to careful, consistent observation over more than two decades.
+    </p>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px">
+      Dashboard analysis &nbsp;·&nbsp; Claude (Anthropic AI) &nbsp;·&nbsp; April 2026 &nbsp;&nbsp;|&nbsp;&nbsp; Butterfly survey observer &nbsp;·&nbsp; Andries de Vries &nbsp;·&nbsp; Observation.org
+    </div>
+  </div>
+</div>
+
+<footer>Rainfall data recorded by Johan (Pine) Pienaar &nbsp;·&nbsp; Blyderivier Botaniese Reservaat, Mpumalanga &nbsp;·&nbsp; Adjacent to the Blyde River Canyon Nature Reserve &nbsp;·&nbsp; Dashboard analysis by Claude (Anthropic) &nbsp;·&nbsp; April 2026</footer>
+
+<script>
+const SEASONS = ["2000/01","2001/02","2002/03","2003/04","2004/05","2005/06","2006/07","2007/08","2008/09","2009/10","2010/11","2011/12","2012/13","2013/14","2014/15","2015/16","2016/17","2017/18","2018/19","2019/20","2020/21","2021/22","2022/23","2023/24","2024/25"];
+const MONTHS = ['AUG','SEP','OCT','NOV','DEC','JAN','FEB','MAR','APR','MAY','JUN','JUL'];
+const MONTH_DATA = {
+  "2000/01": [2.6,6.7,36.5,83.6,104.7,28.0,90.0,14.0,93.5,0.0,0.0,0.0],
+  "2001/02": [0.0,0.5,46.0,183.0,19.5,45.0,24.5,111.5,0.0,8.5,0.0,0.0],
+  "2002/03": [0.0,26.0,25.0,19.0,13.0,115.3,225.0,161.0,78.3,0.0,7.0,10.5],
+  "2003/04": [5.0,7.0,7.8,48.3,22.8,113.7,42.7,27.6,53.3,10.0,0.0,0.0],
+  "2004/05": [0.0,0.0,31.0,63.0,102.8,243.7,314.0,228.7,15.0,3.0,1.5,0.0],
+  "2005/06": [5.5,0.0,15.7,112.3,64.3,116.6,66.2,36.2,39.2,0.0,0.0,4.0],
+  "2006/07": [0.0,3.5,23.0,83.5,92.0,89.8,88.5,5.3,20.8,0.5,1.0,0.0],
+  "2007/08": [0.0,8.3,20.7,136.5,135.9,200.0,180.5,27.0,2.3,0.0,9.2,0.0],
+  "2008/09": [8.5,0.0,11.5,101.1,159.7,67.0,37.3,47.8,99.5,9.7,0.0,0.0],
+  "2009/10": [0.0,5.0,13.5,120.1,118.7,233.2,33.0,64.8,86.7,11.5,0.0,0.0],
+  "2010/11": [0.0,0.0,17.1,144.1,77.0,354.0,28.3,48.5,17.5,0.0,0.0,0.0],
+  "2011/12": [0.0,2.5,64.2,64.0,184.1,184.7,18.3,49.0,78.8,13.3,0.0,0.5],
+  "2012/13": [10.0,40.5,84.6,48.2,90.5,81.5,79.5,264.0,15.8,0.0,0.0,0.0],
+  "2013/14": [12.0,0.0,92.0,77.3,177.0,47.6,37.3,64.6,51.3,0.0,0.0,0.0],
+  "2014/15": [0.0,0.0,36.5,85.3,245.5,49.5,41.5,132.0,2.4,0.0,0.0,0.0],
+  "2015/16": [0.0,27.0,27.0,66.3,37.0,154.0,181.0,61.3,19.0,68.5,8.5,10.5],
+  "2016/17": [0.0,0.1,34.0,113.0,127.5,20.3,97.1,50.0,30.8,39.0,3.0,0.0],
+  "2017/18": [13.1,10.0,53.5,34.5,86.5,117.2,79.0,46.5,40.5,0.0,0.0,0.0],
+  "2018/19": [2.0,0.0,3.0,15.7,86.6,75.0,91.8,31.0,76.0,0.0,0.0,8.0],
+  "2019/20": [3.0,0.0,7.5,112.05,60.6,249.5,110.5,58.0,0.0,0.0,3.0,2.0],
+  "2020/21": [0.0,0.0,124.0,29.5,121.0,81.5,73.5,80.3,33.0,65.5,4.0,0.0],
+  "2021/22": [0.0,0.0,30.0,106.7,92.5,79.0,80.0,35.0,39.0,65.5,4.0,0.0],
+  "2022/23": [0.0,16.0,60.5,79.0,203.5,82.0,79.0,31.0,84.0,0.0,0.0,0.0],
+  "2023/24": [0.0,7.0,10.5,80.5,90.0,85.0,21.0,51.0,85.5,31.5,29.5,0.0],
+  "2024/25": [0.0,4.0,8.5,96.5,96.0,235.0,71.5,14.5,54.0,1.0,0.0,0.0],
+};
+const PARTIAL = {
+  "1999/00": [null,null,null,null,null,113.2,118.7,20.0,7.0,38.0,0.0,0.5],
+  "2025/26": [0.0,17.5,82.0,98.0,132.0,383.5,21.0,109.5,null,null,null,null],
+};
+const TOTALS = {"2000/01":459.6,"2001/02":438.5,"2002/03":680.1,"2003/04":338.2,"2004/05":1002.7,"2005/06":460.0,"2006/07":407.9,"2007/08":720.4,"2008/09":542.1,"2009/10":686.5,"2010/11":686.5,"2011/12":659.4,"2012/13":714.6,"2013/14":559.1,"2014/15":592.7,"2015/16":660.1,"2016/17":514.8,"2017/18":480.8,"2018/19":389.1,"2019/20":606.1,"2020/21":612.3,"2021/22":531.7,"2022/23":635.0,"2023/24":491.5,"2024/25":581.0};
+const MEAN = 578.0;
+const MONTHLY_AVG = [2.5,6.6,35.3,84.1,104.3,125.9,87.6,69.6,44.6,13.1,2.8,1.4];
+const SURVEY_SEASONS = ["2019/20","2020/21","2021/22","2022/23","2023/24","2024/25"];
+const SURVEY_COLORS = ['#e07b54','#e8c34a','#5aad6e','#6baed6','#9e7ec8','#e05c7a'];
+
+// ─── Chart 1: Annual totals ───
+(function(){
+  const totals = SEASONS.map(s => TOTALS[s]);
+  const colors = SEASONS.map(s => TOTALS[s] < 450 ? '#e05c7a33' : TOTALS[s] > 700 ? '#6baed633' : '#c8a84b33');
+  const borders = SEASONS.map(s => TOTALS[s] < 450 ? '#e05c7a' : TOTALS[s] > 700 ? '#6baed6' : '#c8a84b');
+  new Chart(document.getElementById('annual-chart'), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: [
+        { label: 'Annual total (mm)', data: totals, backgroundColor: colors, borderColor: borders, borderWidth: 1.5, borderRadius: 2 },
+        { label: 'Long-term mean (578 mm)', data: SEASONS.map(() => MEAN), type: 'line',
+          borderColor: '#e2c97e', borderDash: [5,4], borderWidth: 1.5,
+          pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color:'#7a9b82', font:{family:'Lato'} } },
+        tooltip: { callbacks: { label: i => ` ${i.dataset.label}: ${i.raw} mm` } }
+      },
+      scales: {
+        x: { ticks:{color:'#7a9b82',font:{size:10}}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+        y: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'},
+             title:{display:true,text:'Rainfall (mm)',color:'#7a9b82'}, min:0 }
+      }
+    }
+  });
+})();
+
+// ─── Chart 2a: Monthly average bar ───
+new Chart(document.getElementById('monthly-avg-chart'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Mean monthly rainfall (mm)',
+      data: MONTHLY_AVG,
+      backgroundColor: MONTHS.map((_,i) => i >= 3 && i <= 8 ? '#6baed655' : '#c8a84b33'),
+      borderColor:     MONTHS.map((_,i) => i >= 3 && i <= 8 ? '#6baed6' : '#c8a84b'),
+      borderWidth: 1.5, borderRadius: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend:{display:false} },
+    scales: {
+      x: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+      y: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'},
+           title:{display:true,text:'Mean mm',color:'#7a9b82'}, min:0 }
+    }
+  }
+});
+
+// ─── Chart 2b: Cumulative % pie-like line ───
+(function(){
+  const cumPct = [];
+  let running = 0;
+  const total = MONTHLY_AVG.reduce((a,b)=>a+b,0);
+  MONTHLY_AVG.forEach(v => { running += v; cumPct.push(+(running/total*100).toFixed(1)); });
+  new Chart(document.getElementById('monthly-pct-chart'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [{
+        label: 'Cumulative % of annual rainfall',
+        data: cumPct,
+        borderColor: '#5aad6e',
+        backgroundColor: 'rgba(90,173,110,0.1)',
+        pointBackgroundColor: '#5aad6e',
+        pointRadius: 4, tension: 0.3, fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend:{labels:{color:'#7a9b82',font:{family:'Lato'}}} },
+      scales: {
+        x: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+        y: { ticks:{color:'#7a9b82',callback:v=>v+'%'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'},
+             title:{display:true,text:'Cumulative %',color:'#7a9b82'}, min:0, max:100 }
+      }
+    }
+  });
+})();
+
+// ─── Chart 3: Monthly heatmap (canvas) ───
+(function(){
+  const container = document.getElementById('heatmap-container');
+  const allSeasons = [...SEASONS];
+  const CELL_W = 44, CELL_H = 26;
+  const PAD_L = 68, PAD_T = 28, PAD_B = 20, PAD_R = 20;
+  const W = PAD_L + MONTHS.length * CELL_W + PAD_R;
+  const H = PAD_T + allSeasons.length * CELL_H + PAD_B;
+
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  cvs.style.cssText = 'max-width:100%;display:block';
+  container.appendChild(cvs);
+
+  const tip = document.createElement('div');
+  tip.style.cssText = 'position:fixed;background:#162019;border:1px solid #2a3d2f;color:#d8e8da;font:12px Lato;padding:6px 10px;border-radius:3px;pointer-events:none;display:none;z-index:999';
+  document.body.appendChild(tip);
+
+  const maxVal = Math.max(...allSeasons.flatMap(s => MONTH_DATA[s] || []));
+
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle = '#162019'; ctx.fillRect(0,0,W,H);
+
+  allSeasons.forEach((s, si) => {
+    const vals = MONTH_DATA[s];
+    const y0 = PAD_T + si * CELL_H;
+    const isSurvey = SURVEY_SEASONS.includes(s);
+
+    // Season label
+    ctx.fillStyle = isSurvey ? '#5aad6e' : '#7a9b82';
+    ctx.font = isSurvey ? 'bold 10px "Source Code Pro",monospace' : '10px "Source Code Pro",monospace';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(s, PAD_L - 8, y0 + CELL_H/2);
+
+    MONTHS.forEach((m, mi) => {
+      const v = vals[mi];
+      const x0 = PAD_L + mi * CELL_W;
+      const alpha = v > 0 ? 0.15 + (v/maxVal) * 0.85 : 0.04;
+      ctx.fillStyle = `rgba(107,174,214,${alpha})`;
+      ctx.fillRect(x0+1, y0+2, CELL_W-2, CELL_H-4);
+      ctx.strokeStyle = 'rgba(42,61,47,0.5)'; ctx.lineWidth = 0.5;
+      ctx.strokeRect(x0+1, y0+2, CELL_W-2, CELL_H-4);
+      if (v > 0) {
+        ctx.fillStyle = alpha > 0.55 ? 'rgba(255,255,255,0.95)' : 'rgba(107,174,214,1)';
+        ctx.font = v >= 100 ? 'bold 8px "Source Code Pro",monospace' : '8px "Source Code Pro",monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(v, x0 + CELL_W/2, y0 + CELL_H/2);
+      }
+    });
+  });
+
+  // Month headers
+  ctx.fillStyle = '#7a9b82'; ctx.font = '9px "Source Code Pro",monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  MONTHS.forEach((m, mi) => {
+    ctx.fillText(m, PAD_L + mi*CELL_W + CELL_W/2, 6);
+  });
+
+  // Tooltip
+  cvs.addEventListener('mousemove', e => {
+    const r = cvs.getBoundingClientRect();
+    const sx = cvs.width/r.width;
+    const mx = (e.clientX-r.left)*sx, my = (e.clientY-r.top)*sx;
+    const col = Math.floor((mx-PAD_L)/CELL_W);
+    const row = Math.floor((my-PAD_T)/CELL_H);
+    if (col>=0 && col<MONTHS.length && row>=0 && row<allSeasons.length) {
+      const s = allSeasons[row], m = MONTHS[col];
+      const v = MONTH_DATA[s][col];
+      tip.style.display='block';
+      tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
+      tip.innerHTML = `<strong>${s}</strong> · ${m}<br><span style="color:#6baed6">${v} mm</span>`;
+    } else { tip.style.display='none'; }
+  });
+  cvs.addEventListener('mouseleave',()=>{tip.style.display='none';});
+})();
+
+// ─── Chart 4: Survey years monthly ───
+(function(){
+  const datasets = SURVEY_SEASONS.map((s, i) => ({
+    label: s,
+    data: MONTH_DATA[s],
+    borderColor: SURVEY_COLORS[i],
+    backgroundColor: SURVEY_COLORS[i]+'22',
+    pointBackgroundColor: SURVEY_COLORS[i],
+    borderWidth: 1.2,
+    pointRadius: 3, tension: 0.3, fill: false
+  }));
+  // Add long-term mean
+  datasets.push({
+    label: 'Long-term mean',
+    data: MONTHLY_AVG,
+    borderColor: '#e2c97e',
+    borderDash: [5,4],
+    borderWidth: 1.5,
+    pointRadius: 0, fill: false
+  });
+  new Chart(document.getElementById('survey-chart'), {
+    type: 'line',
+    data: { labels: MONTHS, datasets },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels:{color:'#7a9b82',font:{family:'Lato'}} },
+        tooltip: { callbacks: { label: i => ` ${i.dataset.label}: ${i.raw} mm` } }
+      },
+      scales: {
+        x: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'} },
+        y: { ticks:{color:'#7a9b82'}, grid:{color:'#1c2b21'}, border:{color:'#2a3d2f'},
+             title:{display:true,text:'Rainfall (mm)',color:'#7a9b82'}, min:0 }
+      }
+    }
+  });
+})();
+
+// ─── Data table ───
+(function(){
+  let html = `<table class="data-table"><thead><tr>
+    <th class="left">Season</th>`;
+  MONTHS.forEach(m => html += `<th>${m}</th>`);
+  html += `<th style="color:var(--gold)">Total</th><th style="color:var(--gold)">Jan–Mar</th></tr></thead><tbody>`;
+
+  const allRows = [
+    {s:'1999/00', vals:PARTIAL['1999/00'], partial:true},
+    ...SEASONS.map(s => ({s, vals:MONTH_DATA[s], partial:false})),
+    {s:'2025/26', vals:PARTIAL['2025/26'], partial:true},
+  ];
+
+  allRows.forEach(({s, vals, partial}) => {
+    const total = vals.filter(v=>v!==null).reduce((a,b)=>a+b,0);
+    const janMar = [vals[5],vals[6],vals[7]].filter(v=>v!==null).reduce((a,b)=>a+b,0);
+    const isDrought = !partial && total < 450;
+    const isWet = !partial && total > 700;
+    const isSurvey = SURVEY_SEASONS.includes(s);
+    const rowClass = [isDrought?'drought-row':'', isWet?'wet-row':'', isSurvey?'survey-row':''].filter(Boolean).join(' ');
+    const totCol = isDrought ? `<span style="color:var(--red);font-weight:700">${total.toFixed(1)}</span>`
+                 : isWet     ? `<span style="color:var(--blue);font-weight:700">${total.toFixed(1)}</span>`
+                 : `<strong>${total.toFixed(1)}</strong>`;
+    html += `<tr class="${rowClass}"><td class="season-col">${s}${partial?' *':''}</td>`;
+    vals.forEach(v => {
+      if (v === null) { html += `<td style="color:#2a3d2f">—</td>`; return; }
+      const intensity = v > 0 ? Math.min(1, v/200) : 0;
+      const alpha = intensity * 0.5;
+      html += `<td style="background:rgba(107,174,214,${alpha});color:${v===0?'#2a3d2f':'inherit'}">${v > 0 ? v : '·'}</td>`;
+    });
+    html += `<td>${totCol}</td><td style="color:var(--text-dim)">${partial?'—':janMar.toFixed(1)}</td></tr>`;
+  });
+
+  // Totals row
+  html += `<tr style="border-top:1px solid var(--gold);font-weight:600"><td class="season-col">TOTAL</td>`;
+  const colTotals = [61.7,181.6,965.6,2201.1,2740.6,3644.8,2330.7,1870.1,1123.2,365.5,70.7,36.0];
+  colTotals.forEach(v => html += `<td style="color:var(--gold)">${v}</td>`);
+  html += `<td style="color:var(--gold)">15,294</td><td style="color:var(--gold)">7,594</td></tr>`;
+
+  // Average row
+  html += `<tr style="font-weight:600"><td class="season-col">AVERAGE</td>`;
+  MONTHLY_AVG.forEach(v => html += `<td style="color:var(--gold-light)">${v}</td>`);
+  html += `<td style="color:var(--gold-light)">578.0</td><td style="color:var(--gold-light)">283.1</td></tr>`;
+
+  html += `</tbody></table>
+  <div style="margin-top:10px;font-size:10px;color:var(--text-dim);font-family:'Source Code Pro',monospace">
+  * Partial season data. Survey years shown with green left border.
+  </div>`;
+  document.getElementById('table-container').innerHTML = html;
+})();
+</script>
+</body>
+</html>
