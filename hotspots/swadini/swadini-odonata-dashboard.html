@@ -1203,5 +1203,340 @@ function updateExplorer() {
 explorerSel.value = 'Microgomphus nyassicus';
 updateExplorer();
 </script>
+
+
+<!-- ═══ SECTION 9: WEEKLY SPECIES BROWSER ═══ -->
+<div class="container">
+<div class="section" id="weekly-browser">
+  <div class="section-label">Section 9</div>
+  <div class="section-title">Weekly Species Browser</div>
+  <div class="section-body">
+    <p>Select a year and click any bar to see exactly which species were recorded that week.
+       The panel below updates instantly with a sorted list grouped by suborder.
+       Use the toggle to switch between record counts and a presence-only view.
+       The chart and species list are fully linked — clicking a species name in the list
+       switches the Species Explorer (Section 8) to that species automatically.</p>
+  </div>
+
+  <div style="background:white; border:1px solid var(--rule); border-radius:4px; padding:24px; box-shadow:var(--shadow);">
+
+    <!-- Controls row -->
+    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
+      <div>
+        <label style="font-size:0.8rem;font-weight:600;color:var(--slate);display:block;margin-bottom:4px;">Year:</label>
+        <div id="yearBtns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+      <div style="margin-left:auto;">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--slate);display:block;margin-bottom:4px;">Show:</label>
+        <div style="display:flex;gap:6px;">
+          <button id="btnCounts"  onclick="setBrowserMode('counts')"
+            style="padding:5px 12px;font-size:11px;font-family:'Source Sans 3',sans-serif;border-radius:3px;cursor:pointer;border:1px solid var(--river);background:var(--river);color:white;">
+            Record counts
+          </button>
+          <button id="btnPresence" onclick="setBrowserMode('presence')"
+            style="padding:5px 12px;font-size:11px;font-family:'Source Sans 3',sans-serif;border-radius:3px;cursor:pointer;border:1px solid #ccc;background:white;color:var(--slate);">
+            Presence only
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar chart -->
+    <div style="position:relative;height:220px;margin-bottom:6px;">
+      <canvas id="browserChart"></canvas>
+    </div>
+    <div id="browserChartNote" style="font-size:0.76rem;color:var(--slate);font-style:italic;margin-bottom:16px;text-align:center;">
+      Click a bar to see the species recorded that week
+    </div>
+
+    <!-- Species panel -->
+    <div id="browserPanel" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--river);padding-bottom:6px;margin-bottom:12px;">
+        <div id="browserTitle" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--river-dark);"></div>
+        <div id="browserMeta"  style="font-size:0.78rem;color:var(--slate);"></div>
+      </div>
+      <div id="browserSearch" style="margin-bottom:12px;">
+        <input type="text" id="browserSearchInput" placeholder="Filter species…"
+          oninput="renderBrowserPanel()"
+          style="font-size:0.82rem;padding:5px 10px;border:1px solid #ccc;border-radius:3px;
+                 background:var(--paper);color:var(--ink);font-family:inherit;width:220px;">
+        <span id="browserCount" style="font-size:0.78rem;color:var(--slate);margin-left:10px;"></span>
+      </div>
+      <div id="browserColumns" style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="browserEmpty" style="text-align:center;padding:24px;color:var(--slate);font-size:0.9rem;">
+      ← Select a year above, then click a bar to explore
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// SECTION 9 DATA
+// ══════════════════════════════════════════════════════════════════
+const WEEK_SP = {"2019": {"18": {"Platycypha caligata": 3, "Trithemis aconita": 3, "Trithemis arteriosa": 3, "Crocothemis sanguinolenta": 2, "Anax speratus": 1, "Orthetrum chrysostigma": 1, "Orthetrum julia": 1, "Mesocnemis singularis": 1, "Lestes plagiatus": 1, "Phyllomacromia picta": 1, "Palpopleura portia": 1, "Pseudagrion hageni": 1, "Pseudagrion kersteni": 1, "Tetrathemis polleni": 1, "Pseudagrion sublacteum": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "19": {"Elattoneura glauca": 1, "Notiothemis jonesi": 1, "Phaon iridipennis": 1, "Pseudagrion hageni": 1, "Trithemis pluvialis": 1}, "20": {"Orthetrum chrysostigma": 5, "Trithemis aconita": 4, "Trithemis donaldsoni": 4, "Orthetrum julia": 4, "Lestinogomphus angustus": 3, "Platycypha caligata": 3, "Elattoneura glauca": 3, "Trithemis pluvialis": 3, "Nesciothemis farinosa": 2, "Trithemis arteriosa": 2, "Tetrathemis polleni": 2, "Trithemis kirbyi": 2, "Pseudagrion kersteni": 2, "Lestes plagiatus": 2, "Pseudagrion hamoni": 2, "Paragomphus cognatus": 2, "Palpopleura portia": 2, "Notiothemis jonesi": 1, "Brachythemis leucosticta": 1, "Crocothemis sanguinolenta": 1, "Anax speratus": 1, "Pseudagrion hageni": 1, "Palpopleura lucia": 1, "Orthetrum hintzi": 1, "Pseudagrion sublacteum": 1}, "21": {"Platycypha caligata": 9, "Orthetrum chrysostigma": 8, "Pseudagrion kersteni": 5, "Trithemis arteriosa": 5, "Trithemis pluvialis": 5, "Lestes plagiatus": 5, "Crocothemis sanguinolenta": 4, "Trithemis kirbyi": 4, "Lestinogomphus angustus": 3, "Trithemis donaldsoni": 3, "Trithemis aconita": 3, "Pseudagrion sublacteum": 3, "Orthetrum julia": 3, "Mesocnemis singularis": 3, "Elattoneura glauca": 2, "Pseudagrion hageni": 2, "Microgomphus nyassicus": 2, "Crocothemis erythraea": 1, "Ceriagrion glabrum": 1, "Brachythemis lacustris": 1, "Palpopleura lucia": 1, "Pseudagrion hamoni": 1, "Paragomphus cognatus": 1, "Pseudagrion massaicum": 1, "Zygonyx torridus": 1}, "22": {"Platycypha caligata": 8, "Orthetrum chrysostigma": 6, "Orthetrum julia": 4, "Lestinogomphus angustus": 4, "Mesocnemis singularis": 4, "Palpopleura portia": 3, "Trithemis donaldsoni": 3, "Trithemis arteriosa": 3, "Trithemis pluvialis": 3, "Trithemis kirbyi": 2, "Pseudagrion sublacteum": 2, "Elattoneura glauca": 2, "Pseudagrion hamoni": 2, "Crocothemis erythraea": 2, "Brachythemis lacustris": 2, "Lestes plagiatus": 1, "Anax speratus": 1, "Orthetrum abbotti": 1, "Notiothemis jonesi": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Paragomphus cognatus": 1, "Tetrathemis polleni": 1, "Pseudagrion kersteni": 1, "Pseudagrion massaicum": 1}, "23": {"Crocothemis sanguinolenta": 2, "Lestes plagiatus": 2, "Orthetrum chrysostigma": 2, "Platycypha caligata": 2, "Trithemis pluvialis": 2, "Notiothemis jonesi": 1, "Mesocnemis singularis": 1, "Palpopleura lucia": 1, "Lestinogomphus angustus": 1, "Phyllomacromia picta": 1, "Pseudagrion hageni": 1, "Pseudagrion sublacteum": 1, "Pseudagrion hamoni": 1, "Tetrathemis polleni": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "24": {"Crocothemis sanguinolenta": 1, "Lestinogomphus angustus": 1, "Orthetrum chrysostigma": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "25": {"Orthetrum chrysostigma": 4, "Platycypha caligata": 4, "Orthetrum julia": 3, "Trithemis arteriosa": 3, "Trithemis donaldsoni": 3, "Pseudagrion sublacteum": 3, "Crocothemis sanguinolenta": 3, "Trithemis pluvialis": 3, "Pseudagrion kersteni": 2, "Mesocnemis singularis": 2, "Phaon iridipennis": 2, "Trithemis kirbyi": 2, "Crocothemis divisa": 1, "Palpopleura portia": 1, "Trithemis aconita": 1}, "26": {"Orthetrum julia": 1, "Pseudagrion kersteni": 1}, "27": {"Trithemis arteriosa": 4, "Orthetrum chrysostigma": 3, "Platycypha caligata": 3, "Orthetrum julia": 3, "Phaon iridipennis": 2, "Trithemis donaldsoni": 2, "Trithemis aconita": 2, "Lestes plagiatus": 2, "Palpopleura lucia": 1, "Notiothemis jonesi": 1, "Crocothemis sanguinolenta": 1, "Pseudagrion hamoni": 1, "Tetrathemis polleni": 1, "Pseudagrion kersteni": 1, "Trithemis annulata": 1, "Trithemis kirbyi": 1}, "28": {"Orthetrum julia": 2, "Crocothemis sanguinolenta": 1, "Palpopleura lucia": 1, "Palpopleura portia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion hageni": 1, "Pseudagrion hamoni": 1, "Pseudagrion kersteni": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis pluvialis": 1}, "29": {"Crocothemis sanguinolenta": 2, "Lestes plagiatus": 2, "Orthetrum julia": 2, "Orthetrum chrysostigma": 2, "Palpopleura portia": 2, "Trithemis kirbyi": 2, "Trithemis arteriosa": 2, "Pseudagrion hamoni": 2, "Palpopleura lucia": 1, "Elattoneura glauca": 1, "Crocothemis erythraea": 1, "Pseudagrion kersteni": 1, "Trithemis aconita": 1, "Pseudagrion sublacteum": 1, "Trithemis donaldsoni": 1, "Trithemis pluvialis": 1}, "30": {"Orthetrum chrysostigma": 2, "Palpopleura portia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion hamoni": 1, "Pseudagrion kersteni": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "31": {"Crocothemis sanguinolenta": 4, "Tetrathemis polleni": 4, "Platycypha caligata": 3, "Trithemis aconita": 3, "Palpopleura portia": 2, "Orthetrum julia": 2, "Trithemis donaldsoni": 2, "Trithemis kirbyi": 2, "Trithemis arteriosa": 2, "Crocothemis erythraea": 1, "Palpopleura jucunda": 1, "Lestes plagiatus": 1, "Pseudagrion sublacteum": 1, "Pseudagrion hamoni": 1}, "45": {"Platycypha caligata": 2, "Crocothemis sanguinolenta": 1, "Hemistigma albipunctum": 1, "Mesocnemis singularis": 1, "Pinheyschna subpupillata": 1, "Trithemis arteriosa": 1}, "46": {"Platycypha caligata": 8, "Orthetrum chrysostigma": 8, "Trithemis donaldsoni": 7, "Mesocnemis singularis": 7, "Trithemis arteriosa": 7, "Elattoneura glauca": 6, "Pseudagrion gamblesi": 5, "Hemistigma albipunctum": 5, "Phaon iridipennis": 5, "Ictinogomphus ferox": 4, "Trithemis pluvialis": 4, "Zygonyx natalensis": 4, "Palpopleura lucia": 3, "Acisoma inflatum": 3, "Palpopleura portia": 3, "Lestinogomphus angustus": 3, "Lestes plagiatus": 3, "Nesciothemis farinosa": 3, "Pseudagrion kersteni": 3, "Zygonyx torridus": 2, "Trithemis kirbyi": 2, "Trithemis stictica": 2, "Crocothemis sanguinolenta": 2, "Ceratogomphus pictus": 2, "Trithemis aconita": 2, "Orthetrum machadoi": 2, "Tetrathemis polleni": 2, "Anax imperator": 1, "Brachythemis lacustris": 1, "Bradinopyga cornuta": 1, "Anax speratus": 1, "Pseudagrion commoniae": 1, "Paragomphus cognatus": 1, "Zygonoides fuelleborni": 1}, "47": {"Brachythemis lacustris": 4, "Elattoneura glauca": 4, "Trithemis arteriosa": 3, "Pseudagrion kersteni": 3, "Mesocnemis singularis": 3, "Hemistigma albipunctum": 2, "Crocothemis sanguinolenta": 2, "Ceriagrion glabrum": 2, "Ictinogomphus ferox": 2, "Orthetrum chrysostigma": 2, "Trithemis donaldsoni": 2, "Platycypha caligata": 2, "Nesciothemis farinosa": 1, "Paragomphus cognatus": 1, "Palpopleura lucia": 1, "Orthetrum julia": 1, "Pseudagrion gamblesi": 1, "Tetrathemis polleni": 1, "Pseudagrion sjoestedti": 1, "Trithemis aconita": 1, "Trithemis kirbyi": 1}}, "2020": {"33": {"Orthetrum chrysostigma": 3, "Lestes plagiatus": 2, "Trithemis aconita": 2, "Crocothemis erythraea": 1, "Orthetrum julia": 1, "Orthetrum stemmale": 1, "Pseudagrion kersteni": 1, "Platycypha caligata": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "34": {"Pinheyschna subpupillata": 1, "Trithemis arteriosa": 1}, "35": {"Platycypha caligata": 5, "Phaon iridipennis": 3, "Trithemis arteriosa": 3, "Trithemis aconita": 2, "Trithemis donaldsoni": 2, "Trithemis kirbyi": 2, "Anax imperator": 1, "Acisoma inflatum": 1, "Crocothemis erythraea": 1, "Lestes plagiatus": 1, "Orthetrum stemmale": 1, "Palpopleura portia": 1, "Notiothemis jonesi": 1, "Orthetrum chrysostigma": 1, "Tetrathemis polleni": 1, "Pseudagrion sublacteum": 1, "Pseudagrion kersteni": 1, "Pseudagrion hamoni": 1}, "36": {"Lestes plagiatus": 2, "Trithemis arteriosa": 2, "Trithemis kirbyi": 2, "Pseudagrion kersteni": 2, "Crocothemis erythraea": 1, "Orthetrum chrysostigma": 1, "Elattoneura glauca": 1, "Crocothemis sanguinolenta": 1, "Pseudagrion hageni": 1}, "37": {"Platycypha caligata": 3, "Pseudagrion gamblesi": 3, "Pseudagrion kersteni": 2, "Phaon iridipennis": 2, "Crocothemis sanguinolenta": 2, "Trithemis kirbyi": 2, "Palpopleura jucunda": 1, "Orthetrum julia": 1, "Orthetrum chrysostigma": 1, "Notiothemis jonesi": 1, "Anax speratus": 1, "Palpopleura portia": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1}, "38": {"Elattoneura glauca": 6, "Trithemis arteriosa": 5, "Crocothemis sanguinolenta": 4, "Platycypha caligata": 4, "Trithemis stictica": 3, "Orthetrum chrysostigma": 3, "Lestes plagiatus": 3, "Trithemis donaldsoni": 2, "Trithemis aconita": 2, "Trithemis kirbyi": 2, "Crocothemis erythraea": 2, "Pseudagrion hageni": 2, "Pseudagrion hamoni": 2, "Pseudagrion commoniae": 2, "Orthetrum julia": 2, "Pseudagrion kersteni": 2, "Mesocnemis singularis": 1, "Anax imperator": 1, "Bradinopyga cornuta": 1, "Phaon iridipennis": 1, "Palpopleura portia": 1, "Palpopleura lucia": 1, "Pseudagrion sublacteum": 1}, "40": {"Elattoneura glauca": 5, "Platycypha caligata": 4, "Pseudagrion gamblesi": 3, "Trithemis arteriosa": 3, "Crocothemis sanguinolenta": 3, "Phaon iridipennis": 2, "Pseudagrion sjoestedti": 2, "Trithemis donaldsoni": 2, "Acisoma variegatum": 1, "Brachythemis lacustris": 1, "Orthetrum chrysostigma": 1, "Bradinopyga cornuta": 1, "Pinheyschna subpupillata": 1, "Phyllomacromia picta": 1, "Pseudagrion hamoni": 1, "Pseudagrion hageni": 1, "Pseudagrion commoniae": 1, "Pseudagrion kersteni": 1, "Pseudagrion sudanicum": 1, "Pseudagrion sublacteum": 1, "Trithemis kirbyi": 1, "Trithemis stictica": 1}, "41": {"Orthetrum julia": 4, "Platycypha caligata": 4, "Pseudagrion kersteni": 4, "Pseudagrion sjoestedti": 4, "Trithemis arteriosa": 3, "Trithemis pluvialis": 3, "Phaon iridipennis": 2, "Pseudagrion hamoni": 2, "Trithemis kirbyi": 2, "Crocothemis sanguinolenta": 2, "Hemistigma albipunctum": 2, "Orthetrum chrysostigma": 2, "Elattoneura glauca": 2, "Bradinopyga cornuta": 1, "Phyllomacromia picta": 1, "Mesocnemis singularis": 1, "Nesciothemis farinosa": 1, "Orthetrum abbotti": 1, "Brachythemis lacustris": 1, "Anax speratus": 1, "Crocothemis erythraea": 1, "Pseudagrion hageni": 1, "Pseudagrion sudanicum": 1, "Pinheyschna subpupillata": 1, "Pseudagrion commoniae": 1, "Tetrathemis polleni": 1, "Trithemis donaldsoni": 1, "Trithemis aconita": 1, "Trithemis stictica": 1, "Zygonyx natalensis": 1}, "42": {"Platycypha caligata": 5, "Trithemis arteriosa": 5, "Pseudagrion gamblesi": 5, "Elattoneura glauca": 4, "Notiothemis jonesi": 4, "Trithemis aconita": 3, "Phaon iridipennis": 3, "Pseudagrion hageni": 3, "Orthetrum julia": 3, "Pseudagrion sjoestedti": 2, "Brachythemis lacustris": 2, "Trithemis pluvialis": 2, "Mesocnemis singularis": 2, "Ictinogomphus ferox": 2, "Anax speratus": 1, "Bradinopyga cornuta": 1, "Lestes virgatus": 1, "Acisoma variegatum": 1, "Pseudagrion kersteni": 1, "Palpopleura portia": 1, "Tetrathemis polleni": 1, "Pseudagrion sudanicum": 1, "Pseudagrion sublacteum": 1, "Trithemis donaldsoni": 1}}, "2021": {"16": {"Orthetrum julia": 4, "Orthetrum chrysostigma": 4, "Crocothemis sanguinolenta": 3, "Elattoneura glauca": 3, "Mesocnemis singularis": 3, "Pseudagrion sublacteum": 3, "Platycypha caligata": 3, "Trithemis pluvialis": 3, "Pseudagrion commoniae": 2, "Trithemis arteriosa": 2, "Pseudagrion hageni": 2, "Orthetrum abbotti": 2, "Pseudagrion gamblesi": 2, "Brachythemis lacustris": 2, "Lestes plagiatus": 1, "Palpopleura jucunda": 1, "Lestinogomphus angustus": 1, "Nesciothemis farinosa": 1, "Onychogomphus supinus": 1, "Azuragrion nigridorsum": 1, "Anax speratus": 1, "Crocothemis erythraea": 1, "Palpopleura portia": 1, "Pseudagrion kersteni": 1, "Pseudagrion hamoni": 1, "Phaon iridipennis": 1, "Pseudagrion sjoestedti": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1, "Zygonyx natalensis": 1, "Zygonyx torridus": 1}, "17": {"Orthetrum abbotti": 3, "Crocothemis sanguinolenta": 2, "Orthetrum chrysostigma": 2, "Palpopleura jucunda": 2, "Trithemis pluvialis": 2, "Pseudagrion sublacteum": 2, "Pseudagrion kersteni": 2, "Platycypha caligata": 2, "Palpopleura portia": 1, "Brachythemis lacustris": 1, "Ceriagrion glabrum": 1, "Mesocnemis singularis": 1, "Pseudagrion gamblesi": 1, "Tetrathemis polleni": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "18": {"Platycypha caligata": 6, "Orthetrum julia": 5, "Crocothemis sanguinolenta": 4, "Mesocnemis singularis": 4, "Brachythemis lacustris": 4, "Microgomphus nyassicus": 4, "Orthetrum chrysostigma": 4, "Pseudagrion sublacteum": 4, "Trithemis pluvialis": 4, "Palpopleura lucia": 3, "Pseudagrion gamblesi": 3, "Trithemis donaldsoni": 3, "Trithemis aconita": 3, "Trithemis arteriosa": 3, "Elattoneura glauca": 3, "Lestes plagiatus": 3, "Crocothemis erythraea": 2, "Pseudagrion kersteni": 2, "Pseudagrion salisburyense": 2, "Pseudagrion hageni": 2, "Palpopleura portia": 2, "Phaon iridipennis": 2, "Lestinogomphus angustus": 2, "Pseudagrion commoniae": 2, "Anax imperator": 1, "Ceriagrion glabrum": 1, "Anax speratus": 1, "Nesciothemis farinosa": 1, "Notiothemis jonesi": 1, "Orthetrum abbotti": 1, "Onychogomphus supinus": 1, "Pseudagrion hamoni": 1, "Pseudagrion massaicum": 1, "Pseudagrion sjoestedti": 1, "Pseudagrion sudanicum": 1, "Zygonyx natalensis": 1, "Zygonyx torridus": 1}, "19": {"Orthetrum chrysostigma": 7, "Pseudagrion sublacteum": 6, "Trithemis donaldsoni": 5, "Trithemis pluvialis": 5, "Platycypha caligata": 4, "Mesocnemis singularis": 4, "Crocothemis sanguinolenta": 4, "Trithemis arteriosa": 4, "Microgomphus nyassicus": 3, "Pseudagrion gamblesi": 3, "Pseudagrion kersteni": 3, "Phyllomacromia picta": 2, "Lestinogomphus angustus": 2, "Lestes plagiatus": 2, "Palpopleura lucia": 2, "Pseudagrion sjoestedti": 2, "Pseudagrion salisburyense": 2, "Pseudagrion hageni": 2, "Pseudagrion hamoni": 2, "Trithemis kirbyi": 2, "Ceriagrion glabrum": 1, "Diplacodes lefebvrii": 1, "Elattoneura glauca": 1, "Orthetrum julia": 1, "Onychogomphus supinus": 1, "Notiothemis jonesi": 1, "Brachythemis lacustris": 1, "Crocothemis erythraea": 1, "Phaon iridipennis": 1, "Trithemis aconita": 1, "Tetrathemis polleni": 1}, "20": {"Trithemis pluvialis": 2, "Microgomphus nyassicus": 1, "Onychogomphus supinus": 1, "Platycypha caligata": 1, "Pseudagrion kersteni": 1, "Pseudagrion sublacteum": 1}, "21": {"Crocothemis sanguinolenta": 6, "Orthetrum chrysostigma": 6, "Platycypha caligata": 6, "Pseudagrion sublacteum": 4, "Palpopleura lucia": 4, "Pseudagrion kersteni": 4, "Trithemis pluvialis": 4, "Nesciothemis farinosa": 3, "Trithemis arteriosa": 3, "Trithemis donaldsoni": 3, "Trithemis kirbyi": 3, "Pseudagrion gamblesi": 2, "Crocothemis erythraea": 2, "Trithemis aconita": 2, "Microgomphus nyassicus": 2, "Mesocnemis singularis": 2, "Orthetrum julia": 2, "Lestes virgatus": 1, "Lestes plagiatus": 1, "Elattoneura glauca": 1, "Palpopleura portia": 1, "Phaon iridipennis": 1, "Pseudagrion hageni": 1, "Pseudagrion commoniae": 1, "Pseudagrion salisburyense": 1, "Pseudagrion sjoestedti": 1}, "22": {"Orthetrum chrysostigma": 4, "Lestes plagiatus": 3, "Pseudagrion gamblesi": 2, "Mesocnemis singularis": 2, "Trithemis arteriosa": 2, "Pseudagrion sublacteum": 2, "Aciagrion gracile": 1, "Crocothemis sanguinolenta": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Orthetrum julia": 1, "Nesciothemis farinosa": 1, "Pseudagrion hamoni": 1, "Platycypha caligata": 1, "Pseudagrion sjoestedti": 1, "Pseudagrion kersteni": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1, "Trithemis furva": 1, "Trithemis kirbyi": 1}, "23": {"Crocothemis erythraea": 1, "Crocothemis sanguinolenta": 1, "Elattoneura glauca": 1, "Lestes plagiatus": 1, "Lestinogomphus angustus": 1, "Orthetrum chrysostigma": 1, "Palpopleura lucia": 1, "Palpopleura portia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion hageni": 1, "Pseudagrion hamoni": 1, "Pseudagrion kersteni": 1, "Pseudagrion salisburyense": 1, "Pseudagrion sjoestedti": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "24": {"Orthetrum chrysostigma": 5, "Crocothemis erythraea": 3, "Lestes plagiatus": 3, "Orthetrum julia": 3, "Trithemis arteriosa": 3, "Trithemis kirbyi": 2, "Pseudagrion sublacteum": 2, "Pseudagrion hamoni": 2, "Platycypha caligata": 2, "Phaon iridipennis": 2, "Pseudagrion gamblesi": 2, "Elattoneura glauca": 2, "Trithemis donaldsoni": 2, "Pseudagrion kersteni": 2, "Anax speratus": 1, "Ceriagrion glabrum": 1, "Crocothemis sanguinolenta": 1, "Notiothemis jonesi": 1, "Trithemis aconita": 1, "Trithemis pluvialis": 1}, "25": {"Orthetrum julia": 3, "Pseudagrion hamoni": 2, "Trithemis arteriosa": 2, "Crocothemis erythraea": 1, "Lestes plagiatus": 1, "Orthetrum chrysostigma": 1, "Lestes pallidus": 1, "Crocothemis sanguinolenta": 1, "Phyllomacromia picta": 1, "Phaon iridipennis": 1, "Pseudagrion kersteni": 1, "Platycypha caligata": 1, "Pseudagrion sublacteum": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "26": {"Microgomphus nyassicus": 2, "Orthetrum chrysostigma": 2, "Lestes plagiatus": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion hamoni": 1, "Pseudagrion sjoestedti": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "27": {"Trithemis arteriosa": 4, "Pseudagrion gamblesi": 3, "Orthetrum chrysostigma": 3, "Platycypha caligata": 3, "Pseudagrion hamoni": 3, "Pseudagrion sublacteum": 3, "Crocothemis sanguinolenta": 2, "Crocothemis erythraea": 2, "Trithemis aconita": 2, "Lestes plagiatus": 2, "Phaon iridipennis": 2, "Orthetrum julia": 2, "Palpopleura lucia": 2, "Trithemis donaldsoni": 2, "Pseudagrion kersteni": 2, "Azuragrion nigridorsum": 1, "Palpopleura portia": 1, "Orthetrum stemmale": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "28": {"Trithemis arteriosa": 4, "Orthetrum julia": 4, "Tetrathemis polleni": 2, "Aciagrion gracile": 2, "Orthetrum chrysostigma": 2, "Crocothemis sanguinolenta": 2, "Pseudagrion hageni": 2, "Trithemis aconita": 2, "Crocothemis erythraea": 1, "Lestes plagiatus": 1, "Pseudagrion gamblesi": 1, "Phaon iridipennis": 1, "Paragomphus genei": 1, "Lestes virgatus": 1, "Pseudagrion sublacteum": 1, "Pseudagrion kersteni": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "29": {"Platycypha caligata": 4, "Trithemis kirbyi": 3, "Orthetrum chrysostigma": 2, "Crocothemis sanguinolenta": 2, "Palpopleura lucia": 2, "Pseudagrion sublacteum": 2, "Pseudagrion gamblesi": 2, "Lestes plagiatus": 2, "Trithemis donaldsoni": 2, "Trithemis arteriosa": 2, "Trithemis pluvialis": 2, "Pseudagrion hamoni": 2, "Phaon iridipennis": 1, "Orthetrum julia": 1, "Aciagrion gracile": 1, "Pseudagrion kersteni": 1}, "30": {"Orthetrum chrysostigma": 2, "Pseudagrion gamblesi": 2, "Crocothemis erythraea": 1, "Crocothemis sanguinolenta": 1, "Lestes plagiatus": 1, "Aciagrion gracile": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion hageni": 1, "Pseudagrion hamoni": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1}, "31": {"Crocothemis erythraea": 2, "Lestes plagiatus": 2, "Orthetrum chrysostigma": 2, "Trithemis kirbyi": 2, "Orthetrum julia": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Crocothemis sanguinolenta": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion kersteni": 1, "Pseudagrion hageni": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1}, "32": {"Pseudagrion gamblesi": 3, "Palpopleura lucia": 3, "Aciagrion gracile": 2, "Trithemis kirbyi": 2, "Crocothemis sanguinolenta": 2, "Platycypha caligata": 2, "Phaon iridipennis": 2, "Trithemis arteriosa": 2, "Trithemis donaldsoni": 2, "Pseudagrion sublacteum": 2, "Pseudagrion kersteni": 2, "Ischnura senegalensis": 1, "Lestes plagiatus": 1, "Orthetrum chrysostigma": 1, "Orthetrum stemmale": 1, "Lestes pallidus": 1, "Pseudagrion hamoni": 1, "Tetrathemis polleni": 1, "Trithemis aconita": 1}, "33": {"Aciagrion gracile": 2, "Crocothemis erythraea": 2, "Crocothemis sanguinolenta": 2, "Platycypha caligata": 2, "Trithemis kirbyi": 2, "Pseudagrion hamoni": 2, "Lestes plagiatus": 1, "Lestes virgatus": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Orthetrum stemmale": 1, "Orthetrum chrysostigma": 1, "Pseudagrion gamblesi": 1, "Pinheyschna subpupillata": 1, "Pseudagrion kersteni": 1, "Pseudagrion hageni": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1}, "34": {"Pinheyschna subpupillata": 2, "Platycypha caligata": 2, "Aciagrion gracile": 1, "Crocothemis sanguinolenta": 1, "Lestes plagiatus": 1, "Elattoneura glauca": 1, "Phaon iridipennis": 1, "Orthetrum chrysostigma": 1, "Pseudagrion gamblesi": 1, "Pseudagrion hamoni": 1, "Pseudagrion kersteni": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "35": {"Crocothemis sanguinolenta": 2, "Elattoneura glauca": 2, "Pseudagrion kersteni": 2, "Aciagrion gracile": 1, "Lestes virgatus": 1, "Phaon iridipennis": 1, "Pseudagrion gamblesi": 1}}, "2022": {"17": {"Lestes plagiatus": 2, "Trithemis arteriosa": 2, "Crocothemis sanguinolenta": 1, "Anax speratus": 1, "Elattoneura glauca": 1, "Orthetrum chrysostigma": 1, "Palpopleura portia": 1, "Crocothemis erythraea": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion sublacteum": 1, "Pseudagrion kersteni": 1, "Pseudagrion sudanicum": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "18": {"Orthetrum julia": 3, "Trithemis pluvialis": 3, "Platycypha caligata": 3, "Elattoneura glauca": 2, "Lestes plagiatus": 2, "Phaon iridipennis": 2, "Pseudagrion kersteni": 2, "Crocothemis erythraea": 2, "Trithemis arteriosa": 2, "Mesocnemis singularis": 1, "Microgomphus nyassicus": 1, "Onychogomphus supinus": 1, "Crocothemis sanguinolenta": 1, "Paragomphus cognatus": 1, "Palpopleura lucia": 1, "Orthetrum trinacria": 1, "Orthetrum caffrum": 1, "Nesciothemis farinosa": 1, "Pseudagrion hageni": 1, "Pseudagrion gamblesi": 1, "Pseudagrion commoniae": 1, "Pseudagrion sublacteum": 1, "Pseudagrion hamoni": 1, "Tramea basilaris": 1, "Tetrathemis polleni": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1, "Trithemis stictica": 1}, "19": {"Crocothemis sanguinolenta": 2, "Elattoneura glauca": 2, "Orthetrum chrysostigma": 2, "Pseudagrion kersteni": 2, "Pseudagrion sublacteum": 2, "Trithemis aconita": 2, "Trithemis donaldsoni": 2, "Crocothemis erythraea": 1, "Phaon iridipennis": 1, "Microgomphus nyassicus": 1, "Mesocnemis singularis": 1, "Lestinogomphus angustus": 1, "Pseudagrion gamblesi": 1, "Platycypha caligata": 1, "Phyllomacromia picta": 1, "Trithemis pluvialis": 1}, "20": {"Pseudagrion gamblesi": 4, "Platycypha caligata": 3, "Pseudagrion sublacteum": 2, "Trithemis pluvialis": 2, "Pseudagrion kersteni": 2, "Pseudagrion hamoni": 2, "Trithemis arteriosa": 2, "Anax speratus": 1, "Crocothemis erythraea": 1, "Phaon iridipennis": 1, "Orthetrum julia": 1, "Orthetrum chrysostigma": 1, "Nesciothemis farinosa": 1, "Crocothemis sanguinolenta": 1, "Lestinogomphus angustus": 1, "Trithemis kirbyi": 1, "Zygonyx natalensis": 1}, "21": {"Lestes plagiatus": 2, "Platycypha caligata": 2, "Crocothemis erythraea": 1, "Elattoneura glauca": 1, "Crocothemis sanguinolenta": 1, "Orthetrum brachiale": 1, "Orthetrum chrysostigma": 1, "Orthetrum julia": 1, "Phaon iridipennis": 1, "Pseudagrion gamblesi": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis pluvialis": 1}, "22": {"Trithemis pluvialis": 3, "Crocothemis erythraea": 2, "Pseudagrion gamblesi": 2, "Lestes plagiatus": 2, "Crocothemis sanguinolenta": 1, "Elattoneura glauca": 1, "Platycypha caligata": 1, "Orthetrum chrysostigma": 1, "Pseudagrion sublacteum": 1, "Pseudagrion kersteni": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "23": {"Platycypha caligata": 3, "Elattoneura glauca": 3, "Trithemis arteriosa": 2, "Crocothemis erythraea": 2, "Phaon iridipennis": 2, "Trithemis donaldsoni": 2, "Pseudagrion kersteni": 2, "Pseudagrion sublacteum": 2, "Pseudagrion gamblesi": 2, "Anax speratus": 1, "Orthetrum chrysostigma": 1, "Orthetrum julia": 1, "Lestes plagiatus": 1, "Lestes virgatus": 1, "Crocothemis sanguinolenta": 1, "Trithemis aconita": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "24": {"Crocothemis erythraea": 1, "Lestes plagiatus": 1, "Microgomphus nyassicus": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis pluvialis": 1}, "25": {"Pseudagrion sublacteum": 3, "Trithemis arteriosa": 3, "Platycypha caligata": 2, "Crocothemis sanguinolenta": 1, "Crocothemis erythraea": 1, "Orthetrum julia": 1, "Orthetrum chrysostigma": 1, "Lestes plagiatus": 1, "Pseudagrion gamblesi": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "26": {"Trithemis pluvialis": 3, "Crocothemis sanguinolenta": 2, "Crocothemis erythraea": 1, "Orthetrum chrysostigma": 1, "Phaon iridipennis": 1, "Pseudagrion gamblesi": 1, "Platycypha caligata": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1}, "27": {"Lestes virgatus": 2, "Crocothemis erythraea": 1, "Crocothemis sanguinolenta": 1, "Lestes plagiatus": 1, "Microgomphus nyassicus": 1, "Orthetrum chrysostigma": 1, "Orthetrum julia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion hageni": 1, "Pseudagrion kersteni": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "28": {"Platycypha caligata": 4, "Orthetrum chrysostigma": 3, "Pseudagrion gamblesi": 3, "Trithemis kirbyi": 2, "Pseudagrion sublacteum": 2, "Pseudagrion hageni": 2, "Trithemis arteriosa": 2, "Phaon iridipennis": 1, "Crocothemis sanguinolenta": 1, "Lestes virgatus": 1, "Trithemis aconita": 1, "Pseudagrion kersteni": 1, "Trithemis donaldsoni": 1, "Trithemis pluvialis": 1}, "29": {"Pseudagrion kersteni": 2, "Phaon iridipennis": 1, "Trithemis arteriosa": 1}, "30": {"Palpopleura lucia": 3, "Platycypha caligata": 3, "Trithemis donaldsoni": 3, "Notiothemis jonesi": 2, "Crocothemis sanguinolenta": 2, "Trithemis kirbyi": 2, "Trithemis arteriosa": 2, "Pseudagrion sublacteum": 2, "Phaon iridipennis": 2, "Pseudagrion gamblesi": 2, "Tetrathemis polleni": 2, "Pseudagrion kersteni": 2, "Orthetrum chrysostigma": 2, "Lestes virgatus": 1, "Lestes plagiatus": 1, "Crocothemis erythraea": 1, "Orthetrum julia": 1, "Palpopleura portia": 1, "Orthetrum stemmale": 1, "Trithemis aconita": 1, "Trithemis pluvialis": 1}, "31": {"Orthetrum chrysostigma": 2, "Phaon iridipennis": 2, "Pseudagrion gamblesi": 2, "Trithemis donaldsoni": 2, "Trithemis kirbyi": 2, "Trithemis arteriosa": 2, "Palpopleura lucia": 1, "Pseudagrion kersteni": 1, "Pseudagrion hamoni": 1, "Platycypha caligata": 1, "Tetrathemis polleni": 1}, "32": {"Lestes virgatus": 2, "Platycypha caligata": 2, "Palpopleura lucia": 2, "Trithemis arteriosa": 2, "Trithemis donaldsoni": 2, "Orthetrum julia": 1, "Crocothemis erythraea": 1, "Pseudagrion gamblesi": 1, "Phaon iridipennis": 1, "Pseudagrion hamoni": 1, "Pseudagrion kersteni": 1, "Tetrathemis polleni": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis kirbyi": 1}, "33": {"Pseudagrion gamblesi": 8, "Pseudagrion hamoni": 6, "Platycypha caligata": 5, "Tetrathemis polleni": 5, "Trithemis arteriosa": 5, "Phaon iridipennis": 4, "Pseudagrion kersteni": 4, "Pseudagrion sublacteum": 4, "Orthetrum chrysostigma": 4, "Trithemis aconita": 4, "Pseudagrion sjoestedti": 4, "Trithemis kirbyi": 3, "Palpopleura lucia": 3, "Trithemis donaldsoni": 2, "Orthetrum julia": 2, "Elattoneura glauca": 2, "Pseudagrion hageni": 2, "Orthetrum stemmale": 1, "Hemistigma albipunctum": 1, "Lestes plagiatus": 1, "Lestes virgatus": 1, "Crocothemis sanguinolenta": 1, "Pinheyschna subpupillata": 1, "Pseudagrion salisburyense": 1, "Pseudagrion sudanicum": 1}, "34": {"Phaon iridipennis": 2, "Pseudagrion sjoestedti": 2, "Platycypha caligata": 2, "Trithemis arteriosa": 2, "Elattoneura glauca": 1, "Crocothemis sanguinolenta": 1, "Crocothemis erythraea": 1, "Palpopleura lucia": 1, "Orthetrum stemmale": 1, "Orthetrum julia": 1, "Pseudagrion gamblesi": 1, "Pseudagrion kersteni": 1, "Tetrathemis polleni": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1}}, "2023": {"17": {"Orthetrum chrysostigma": 7, "Trithemis furva": 5, "Crocothemis erythraea": 4, "Pseudagrion kersteni": 4, "Trithemis arteriosa": 4, "Orthetrum julia": 3, "Trithemis aconita": 3, "Platycypha caligata": 3, "Mesocnemis singularis": 3, "Onychogomphus supinus": 3, "Elattoneura glauca": 3, "Pseudagrion gamblesi": 3, "Trithemis kirbyi": 3, "Pseudagrion sublacteum": 2, "Phyllomacromia picta": 2, "Crocothemis sanguinolenta": 2, "Tetrathemis polleni": 2, "Trithemis donaldsoni": 2, "Phaon iridipennis": 2, "Trithemis pluvialis": 2, "Lestinogomphus angustus": 1, "Anax speratus": 1, "Ceriagrion glabrum": 1, "Palpopleura lucia": 1, "Pseudagrion sjoestedti": 1, "Paragomphus genei": 1, "Pseudagrion salisburyense": 1}, "18": {"Pseudagrion salisburyense": 4, "Trithemis donaldsoni": 4, "Trithemis arteriosa": 3, "Pseudagrion hamoni": 3, "Elattoneura glauca": 2, "Crocothemis sanguinolenta": 2, "Trithemis aconita": 2, "Pseudagrion sublacteum": 2, "Trithemis pluvialis": 2, "Pseudagrion kersteni": 2, "Platycypha caligata": 2, "Mesocnemis singularis": 2, "Phaon iridipennis": 2, "Orthetrum julia": 2, "Lestinogomphus angustus": 1, "Crocothemis erythraea": 1, "Anax speratus": 1, "Brachythemis lacustris": 1, "Pseudagrion gamblesi": 1, "Palpopleura portia": 1, "Orthetrum chrysostigma": 1, "Trithemis kirbyi": 1}, "19": {"Crocothemis erythraea": 3, "Palpopleura portia": 3, "Phaon iridipennis": 3, "Trithemis donaldsoni": 3, "Platycypha caligata": 3, "Crocothemis sanguinolenta": 2, "Elattoneura glauca": 2, "Trithemis pluvialis": 2, "Trithemis kirbyi": 2, "Trithemis aconita": 2, "Orthetrum julia": 2, "Orthetrum chrysostigma": 2, "Onychogomphus supinus": 1, "Mesocnemis singularis": 1, "Brachythemis leucosticta": 1, "Orthetrum abbotti": 1, "Pseudagrion salisburyense": 1, "Pseudagrion hamoni": 1, "Pseudagrion kersteni": 1, "Tetrathemis polleni": 1, "Pseudagrion sudanicum": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1}, "20": {"Trithemis arteriosa": 4, "Orthetrum chrysostigma": 3, "Mesocnemis singularis": 3, "Platycypha caligata": 3, "Pseudagrion gamblesi": 3, "Trithemis pluvialis": 3, "Crocothemis sanguinolenta": 2, "Trithemis furva": 2, "Pseudagrion sublacteum": 2, "Trithemis donaldsoni": 2, "Phaon iridipennis": 2, "Crocothemis erythraea": 2, "Pseudagrion hamoni": 2, "Pseudagrion kersteni": 2, "Ceriagrion glabrum": 1, "Lestes plagiatus": 1, "Elattoneura glauca": 1, "Anax speratus": 1, "Paragomphus cognatus": 1, "Pseudagrion salisburyense": 1, "Pseudagrion sjoestedti": 1, "Trithemis aconita": 1, "Trithemis kirbyi": 1}, "21": {"Pseudagrion gamblesi": 4, "Orthetrum chrysostigma": 3, "Pseudagrion hamoni": 3, "Orthetrum julia": 3, "Pseudagrion salisburyense": 3, "Platycypha caligata": 2, "Elattoneura glauca": 2, "Crocothemis sanguinolenta": 2, "Pseudagrion kersteni": 2, "Trithemis aconita": 2, "Pseudagrion sublacteum": 2, "Phaon iridipennis": 2, "Lestes plagiatus": 1, "Mesocnemis singularis": 1, "Crocothemis erythraea": 1, "Anax speratus": 1, "Pseudagrion hageni": 1, "Palpopleura lucia": 1, "Palpopleura portia": 1, "Tetrathemis polleni": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis furva": 1, "Trithemis pluvialis": 1}, "22": {"Trithemis arteriosa": 6, "Platycypha caligata": 4, "Trithemis pluvialis": 4, "Trithemis aconita": 3, "Orthetrum chrysostigma": 3, "Crocothemis sanguinolenta": 3, "Crocothemis erythraea": 2, "Pseudagrion kersteni": 2, "Pseudagrion sublacteum": 2, "Lestes plagiatus": 1, "Mesocnemis singularis": 1, "Pseudagrion hageni": 1, "Pseudagrion gamblesi": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Tetrathemis polleni": 1, "Pseudagrion salisburyense": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "23": {"Microgomphus nyassicus": 3, "Orthetrum julia": 2, "Pseudagrion gamblesi": 2, "Lestes plagiatus": 1, "Crocothemis sanguinolenta": 1, "Crocothemis erythraea": 1, "Mesocnemis singularis": 1, "Orthetrum stemmale": 1, "Phaon iridipennis": 1, "Phyllomacromia picta": 1, "Platycypha caligata": 1, "Pseudagrion kersteni": 1, "Pseudagrion salisburyense": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "24": {"Pseudagrion gamblesi": 3, "Orthetrum julia": 2, "Phaon iridipennis": 2, "Pseudagrion sublacteum": 2, "Crocothemis erythraea": 1, "Crocothemis sanguinolenta": 1, "Aciagrion gracile": 1, "Microgomphus nyassicus": 1, "Orthetrum chrysostigma": 1, "Platycypha caligata": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "25": {"Orthetrum chrysostigma": 4, "Crocothemis sanguinolenta": 3, "Phaon iridipennis": 3, "Pseudagrion sublacteum": 3, "Pseudagrion gamblesi": 2, "Platycypha caligata": 2, "Trithemis aconita": 2, "Lestes plagiatus": 2, "Trithemis pluvialis": 2, "Trithemis donaldsoni": 2, "Trithemis kirbyi": 2, "Mesocnemis singularis": 1, "Pseudagrion hageni": 1, "Pseudagrion kersteni": 1, "Pseudagrion hamoni": 1, "Trithemis arteriosa": 1}, "26": {"Pseudagrion kersteni": 3, "Orthetrum julia": 3, "Orthetrum chrysostigma": 3, "Pseudagrion hamoni": 3, "Trithemis arteriosa": 2, "Crocothemis erythraea": 2, "Crocothemis sanguinolenta": 2, "Platycypha caligata": 2, "Pseudagrion sublacteum": 2, "Palpopleura lucia": 2, "Pseudagrion gamblesi": 2, "Aciagrion gracile": 1, "Paragomphus genei": 1, "Lestes plagiatus": 1, "Phaon iridipennis": 1, "Pseudagrion salisburyense": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "27": {"Lestes plagiatus": 1, "Orthetrum chrysostigma": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion hageni": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "28": {"Orthetrum chrysostigma": 3, "Pseudagrion gamblesi": 3, "Trithemis arteriosa": 2, "Palpopleura lucia": 2, "Lestes plagiatus": 2, "Phaon iridipennis": 2, "Trithemis donaldsoni": 2, "Trithemis kirbyi": 2, "Orthetrum julia": 2, "Aciagrion gracile": 1, "Orthetrum stemmale": 1, "Crocothemis sanguinolenta": 1, "Crocothemis erythraea": 1, "Pseudagrion sublacteum": 1, "Pseudagrion hamoni": 1, "Platycypha caligata": 1, "Trithemis aconita": 1}, "29": {"Crocothemis sanguinolenta": 1, "Orthetrum chrysostigma": 1, "Platycypha caligata": 1, "Pseudagrion sublacteum": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "30": {"Platycypha caligata": 5, "Pseudagrion gamblesi": 3, "Trithemis arteriosa": 3, "Trithemis kirbyi": 2, "Trithemis donaldsoni": 2, "Trithemis aconita": 2, "Orthetrum chrysostigma": 2, "Pseudagrion sublacteum": 2, "Phaon iridipennis": 2, "Aciagrion gracile": 1, "Ceriagrion glabrum": 1, "Crocothemis sanguinolenta": 1, "Elattoneura glauca": 1, "Nesciothemis farinosa": 1, "Orthetrum julia": 1, "Pseudagrion hamoni": 1, "Pseudagrion salisburyense": 1, "Pseudagrion kersteni": 1, "Trithemis pluvialis": 1}, "32": {"Trithemis aconita": 2, "Anax imperator": 1, "Orthetrum julia": 1, "Phaon iridipennis": 1, "Pseudagrion gamblesi": 1, "Platycypha caligata": 1, "Pseudagrion hamoni": 1, "Pseudagrion kersteni": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1}, "33": {"Lestes plagiatus": 3, "Pseudagrion gamblesi": 3, "Platycypha caligata": 3, "Pseudagrion sublacteum": 3, "Phaon iridipennis": 2, "Lestes virgatus": 2, "Elattoneura glauca": 2, "Trithemis kirbyi": 2, "Trithemis arteriosa": 2, "Pseudagrion hamoni": 2, "Anax imperator": 1, "Orthetrum chrysostigma": 1, "Crocothemis erythraea": 1, "Pseudagrion kersteni": 1, "Trithemis donaldsoni": 1}}, "2024": {"17": {"Trithemis aconita": 3, "Crocothemis sanguinolenta": 2, "Trithemis donaldsoni": 2, "Trithemis kirbyi": 2, "Platycypha caligata": 2, "Mesocnemis singularis": 2, "Pseudagrion sublacteum": 2, "Aciagrion gracile": 1, "Ceriagrion glabrum": 1, "Elattoneura glauca": 1, "Pseudagrion gamblesi": 1, "Paragomphus cognatus": 1, "Palpopleura lucia": 1, "Orthetrum chrysostigma": 1, "Pseudagrion kersteni": 1, "Pseudagrion sjoestedti": 1, "Trithemis arteriosa": 1, "Trithemis pluvialis": 1}, "18": {"Orthetrum julia": 5, "Mesocnemis singularis": 3, "Nesciothemis farinosa": 3, "Trithemis arteriosa": 3, "Platycypha caligata": 3, "Orthetrum chrysostigma": 3, "Crocothemis sanguinolenta": 2, "Trithemis pluvialis": 2, "Trithemis donaldsoni": 2, "Elattoneura glauca": 2, "Lestes plagiatus": 2, "Trithemis aconita": 2, "Pseudagrion gamblesi": 2, "Lestinogomphus angustus": 1, "Anax speratus": 1, "Paragomphus cognatus": 1, "Phyllomacromia picta": 1, "Orthetrum stemmale": 1, "Palpopleura lucia": 1, "Pseudagrion sublacteum": 1, "Pseudagrion hamoni": 1, "Pseudagrion hageni": 1, "Trithemis kirbyi": 1}, "19": {"Orthetrum julia": 5, "Orthetrum chrysostigma": 4, "Pseudagrion gamblesi": 3, "Trithemis pluvialis": 3, "Trithemis arteriosa": 3, "Palpopleura portia": 2, "Phaon iridipennis": 2, "Pseudagrion kersteni": 2, "Crocothemis sanguinolenta": 2, "Trithemis donaldsoni": 2, "Tetrathemis polleni": 2, "Pseudagrion sublacteum": 2, "Mesocnemis singularis": 1, "Lestinogomphus angustus": 1, "Elattoneura glauca": 1, "Crocothemis erythraea": 1, "Ceriagrion glabrum": 1, "Notiothemis jonesi": 1, "Nesciothemis farinosa": 1, "Microgomphus nyassicus": 1, "Palpopleura lucia": 1, "Platycypha caligata": 1, "Paragomphus cognatus": 1, "Pseudagrion hageni": 1, "Trithemis aconita": 1}, "20": {"Orthetrum chrysostigma": 5, "Platycypha caligata": 5, "Orthetrum julia": 4, "Mesocnemis singularis": 4, "Pseudagrion gamblesi": 4, "Trithemis arteriosa": 4, "Pseudagrion kersteni": 3, "Crocothemis sanguinolenta": 3, "Phaon iridipennis": 3, "Pseudagrion sublacteum": 3, "Trithemis donaldsoni": 3, "Trithemis aconita": 3, "Trithemis pluvialis": 3, "Microgomphus nyassicus": 2, "Notiothemis jonesi": 2, "Crocothemis erythraea": 2, "Pseudagrion hageni": 2, "Palpopleura jucunda": 1, "Nesciothemis farinosa": 1, "Aciagrion gracile": 1, "Ceriagrion glabrum": 1, "Elattoneura glauca": 1, "Lestes plagiatus": 1, "Lestes virgatus": 1, "Brachythemis leucosticta": 1, "Orthetrum stemmale": 1, "Paragomphus cognatus": 1, "Palpopleura lucia": 1, "Pseudagrion hamoni": 1, "Pseudagrion sjoestedti": 1, "Tetrathemis polleni": 1, "Trithemis kirbyi": 1}, "21": {"Pseudagrion kersteni": 3, "Orthetrum julia": 3, "Orthetrum chrysostigma": 3, "Trithemis aconita": 2, "Elattoneura glauca": 2, "Crocothemis sanguinolenta": 2, "Microgomphus nyassicus": 2, "Pseudagrion sublacteum": 2, "Trithemis arteriosa": 2, "Trithemis pluvialis": 2, "Aciagrion gracile": 1, "Platycypha caligata": 1, "Phaon iridipennis": 1, "Paragomphus cognatus": 1, "Notiothemis jonesi": 1, "Lestes plagiatus": 1, "Pseudagrion hageni": 1, "Pseudagrion gamblesi": 1, "Trithemis donaldsoni": 1}, "22": {"Mesocnemis singularis": 1, "Pseudagrion gamblesi": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1, "Trithemis pluvialis": 1}, "24": {"Orthetrum chrysostigma": 4, "Platycypha caligata": 4, "Trithemis donaldsoni": 4, "Trithemis arteriosa": 3, "Phaon iridipennis": 3, "Crocothemis sanguinolenta": 2, "Pseudagrion sublacteum": 2, "Orthetrum julia": 2, "Crocothemis erythraea": 2, "Pseudagrion gamblesi": 2, "Trithemis aconita": 2, "Pseudagrion hamoni": 2, "Trithemis kirbyi": 2, "Ceriagrion glabrum": 1}, "25": {"Orthetrum chrysostigma": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion kersteni": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1}, "26": {"Lestes plagiatus": 1, "Orthetrum julia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion kersteni": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1}, "27": {"Trithemis aconita": 2, "Crocothemis erythraea": 1, "Orthetrum stemmale": 1, "Orthetrum julia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1}, "28": {"Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1}, "29": {"Orthetrum chrysostigma": 1, "Orthetrum julia": 1, "Palpopleura lucia": 1, "Platycypha caligata": 1, "Pseudagrion sublacteum": 1, "Tetrathemis polleni": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "31": {"Trithemis donaldsoni": 2, "Orthetrum chrysostigma": 1, "Orthetrum julia": 1, "Palpopleura lucia": 1, "Platycypha caligata": 1, "Phaon iridipennis": 1, "Pseudagrion gamblesi": 1, "Pseudagrion hamoni": 1, "Tetrathemis polleni": 1, "Trithemis arteriosa": 1}, "32": {"Orthetrum chrysostigma": 1, "Orthetrum julia": 1, "Palpopleura lucia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion gamblesi": 1, "Pseudagrion sjoestedti": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}}, "2025": {"18": {"Crocothemis sanguinolenta": 3, "Trithemis arteriosa": 3, "Orthetrum chrysostigma": 2, "Trithemis pluvialis": 2, "Platycypha caligata": 2, "Pseudagrion gamblesi": 1, "Lestinogomphus angustus": 1, "Trithemis aconita": 1, "Pseudagrion hamoni": 1}, "19": {"Trithemis pluvialis": 8, "Orthetrum chrysostigma": 8, "Platycypha caligata": 6, "Pseudagrion gamblesi": 5, "Crocothemis sanguinolenta": 5, "Trithemis aconita": 5, "Pseudagrion sublacteum": 4, "Trithemis arteriosa": 4, "Phaon iridipennis": 4, "Nesciothemis farinosa": 4, "Elattoneura glauca": 4, "Trithemis donaldsoni": 3, "Orthetrum julia": 3, "Ischnura senegalensis": 2, "Trithemis kirbyi": 2, "Mesocnemis singularis": 1, "Anax speratus": 1, "Crocothemis erythraea": 1, "Pseudagrion kersteni": 1, "Microgomphus nyassicus": 1, "Tetrathemis polleni": 1, "Zygonyx natalensis": 1}, "20": {"Crocothemis sanguinolenta": 3, "Trithemis arteriosa": 3, "Pseudagrion sublacteum": 3, "Platycypha caligata": 3, "Trithemis donaldsoni": 2, "Crocothemis erythraea": 1, "Microgomphus nyassicus": 1, "Nesciothemis farinosa": 1, "Pantala flavescens": 1, "Palpopleura lucia": 1, "Orthetrum chrysostigma": 1, "Onychogomphus supinus": 1, "Trithemis aconita": 1, "Phyllomacromia picta": 1, "Trithemis kirbyi": 1, "Trithemis pluvialis": 1}, "21": {"Platycypha caligata": 7, "Crocothemis sanguinolenta": 6, "Trithemis donaldsoni": 6, "Trithemis arteriosa": 5, "Pseudagrion sublacteum": 4, "Brachythemis leucosticta": 4, "Orthetrum chrysostigma": 4, "Pseudagrion gamblesi": 3, "Trithemis pluvialis": 3, "Microgomphus nyassicus": 2, "Trithemis kirbyi": 2, "Nesciothemis farinosa": 2, "Orthetrum julia": 2, "Phaon iridipennis": 2, "Anax speratus": 1, "Crocothemis erythraea": 1, "Palpopleura lucia": 1, "Trithemis aconita": 1}, "22": {"Platycypha caligata": 9, "Crocothemis sanguinolenta": 8, "Orthetrum chrysostigma": 7, "Trithemis pluvialis": 6, "Trithemis donaldsoni": 6, "Pseudagrion sublacteum": 5, "Phaon iridipennis": 5, "Orthetrum julia": 5, "Trithemis arteriosa": 4, "Pseudagrion kersteni": 4, "Trithemis kirbyi": 3, "Anax speratus": 3, "Microgomphus nyassicus": 3, "Pseudagrion gamblesi": 3, "Crocothemis erythraea": 2, "Nesciothemis farinosa": 2, "Lestinogomphus angustus": 2, "Trithemis aconita": 2}, "23": {"Orthetrum chrysostigma": 5, "Trithemis pluvialis": 3, "Microgomphus nyassicus": 3, "Trithemis kirbyi": 2, "Trithemis donaldsoni": 2, "Crocothemis sanguinolenta": 1, "Phaon iridipennis": 1, "Pseudagrion sublacteum": 1, "Trithemis arteriosa": 1}, "24": {"Platycypha caligata": 5, "Phaon iridipennis": 4, "Pseudagrion gamblesi": 3, "Pseudagrion sublacteum": 2, "Trithemis arteriosa": 2, "Orthetrum chrysostigma": 2, "Anax speratus": 1, "Nesciothemis farinosa": 1, "Lestes plagiatus": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "25": {"Orthetrum chrysostigma": 12, "Trithemis pluvialis": 9, "Trithemis donaldsoni": 7, "Phaon iridipennis": 7, "Trithemis aconita": 7, "Crocothemis sanguinolenta": 6, "Platycypha caligata": 5, "Trithemis kirbyi": 4, "Trithemis arteriosa": 4, "Pseudagrion gamblesi": 4, "Pseudagrion sublacteum": 3, "Pseudagrion kersteni": 3, "Crocothemis erythraea": 2, "Orthetrum julia": 1, "Palpopleura lucia": 1, "Elattoneura glauca": 1, "Lestes plagiatus": 1, "Pseudagrion hamoni": 1}, "26": {"Crocothemis sanguinolenta": 5, "Orthetrum chrysostigma": 5, "Platycypha caligata": 5, "Phaon iridipennis": 5, "Trithemis arteriosa": 5, "Crocothemis erythraea": 4, "Trithemis kirbyi": 4, "Trithemis pluvialis": 4, "Orthetrum julia": 3, "Pseudagrion gamblesi": 2, "Pseudagrion sublacteum": 2, "Palpopleura lucia": 1, "Phyllomacromia picta": 1, "Pseudagrion hamoni": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1}, "29": {"Trithemis arteriosa": 4, "Crocothemis sanguinolenta": 3, "Pseudagrion gamblesi": 3, "Orthetrum chrysostigma": 3, "Phaon iridipennis": 2, "Anax imperator": 1, "Crocothemis erythraea": 1, "Elattoneura glauca": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "30": {"Orthetrum chrysostigma": 4, "Platycypha caligata": 4, "Trithemis arteriosa": 4, "Phaon iridipennis": 4, "Trithemis aconita": 3, "Trithemis donaldsoni": 2, "Pseudagrion gamblesi": 2, "Lestes plagiatus": 1, "Crocothemis sanguinolenta": 1, "Orthetrum julia": 1, "Lestes virgatus": 1, "Pseudagrion hamoni": 1, "Trithemis kirbyi": 1}, "31": {"Orthetrum chrysostigma": 2, "Pseudagrion kersteni": 2, "Crocothemis sanguinolenta": 1, "Orthetrum julia": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Trithemis aconita": 1, "Trithemis arteriosa": 1, "Trithemis donaldsoni": 1, "Trithemis kirbyi": 1}, "32": {"Pseudagrion gamblesi": 4, "Crocothemis sanguinolenta": 3, "Platycypha caligata": 2, "Phaon iridipennis": 2, "Trithemis kirbyi": 2, "Trithemis arteriosa": 2, "Pseudagrion hamoni": 2, "Crocothemis erythraea": 1, "Lestes plagiatus": 1, "Pseudagrion sublacteum": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1}, "33": {"Pseudagrion gamblesi": 8, "Pseudagrion hamoni": 5, "Orthetrum chrysostigma": 5, "Pseudagrion sublacteum": 4, "Platycypha caligata": 4, "Trithemis kirbyi": 3, "Trithemis arteriosa": 3, "Crocothemis sanguinolenta": 2, "Orthetrum julia": 2, "Trithemis donaldsoni": 2, "Phaon iridipennis": 2, "Crocothemis erythraea": 1, "Pseudagrion kersteni": 1}, "34": {"Trithemis arteriosa": 3, "Orthetrum chrysostigma": 2, "Trithemis kirbyi": 2, "Lestes plagiatus": 1, "Phaon iridipennis": 1, "Platycypha caligata": 1, "Pseudagrion kersteni": 1, "Pseudagrion gamblesi": 1, "Trithemis aconita": 1, "Trithemis donaldsoni": 1}, "35": {"Trithemis arteriosa": 4, "Orthetrum chrysostigma": 2, "Pseudagrion sublacteum": 2, "Platycypha caligata": 2, "Pseudagrion hamoni": 1, "Pseudagrion gamblesi": 1, "Pseudagrion sjoestedti": 1, "Trithemis kirbyi": 1}}};
+const SUBORDER_MAP = {"Phaon iridipennis": "Z", "Trithemis arteriosa": "A", "Platycypha caligata": "Z", "Trithemis aconita": "A", "Orthetrum chrysostigma": "A", "Pseudagrion gamblesi": "Z", "Pseudagrion hamoni": "Z", "Trithemis pluvialis": "A", "Crocothemis sanguinolenta": "A", "Lestinogomphus angustus": "A", "Anax speratus": "A", "Mesocnemis singularis": "Z", "Pseudagrion sublacteum": "Z", "Elattoneura glauca": "Z", "Nesciothemis farinosa": "A", "Trithemis donaldsoni": "A", "Trithemis kirbyi": "A", "Orthetrum julia": "A", "Ischnura senegalensis": "Z", "Tetrathemis polleni": "A", "Zygonyx natalensis": "A", "Pantala flavescens": "A", "Pseudagrion kersteni": "Z", "Microgomphus nyassicus": "A", "Crocothemis erythraea": "A", "Phyllomacromia picta": "A", "Palpopleura lucia": "A", "Onychogomphus supinus": "A", "Brachythemis leucosticta": "A", "Lestes plagiatus": "Z", "Anax imperator": "A", "Lestes virgatus": "Z", "Palpopleura portia": "A", "Pseudagrion hageni": "Z", "Notiothemis jonesi": "A", "Paragomphus cognatus": "A", "Orthetrum hintzi": "A", "Zygonyx torridus": "A", "Brachythemis lacustris": "A", "Pseudagrion massaicum": "Z", "Ceriagrion glabrum": "Z", "Orthetrum abbotti": "A", "Crocothemis divisa": "A", "Trithemis annulata": "A", "Palpopleura jucunda": "A", "Pinheyschna subpupillata": "A", "Hemistigma albipunctum": "A", "Ictinogomphus ferox": "A", "Acisoma inflatum": "A", "Trithemis stictica": "A", "Orthetrum machadoi": "A", "Pseudagrion commoniae": "Z", "Bradinopyga cornuta": "A", "Ceratogomphus pictus": "A", "Zygonoides fuelleborni": "A", "Pseudagrion sjoestedti": "Z", "Orthetrum stemmale": "A", "Acisoma variegatum": "A", "Pseudagrion sudanicum": "Z", "Azuragrion nigridorsum": "Z", "Pseudagrion salisburyense": "Z", "Diplacodes lefebvrii": "A", "Aciagrion gracile": "Z", "Trithemis furva": "A", "Lestes pallidus": "Z", "Paragomphus genei": "A", "Orthetrum caffrum": "A", "Orthetrum trinacria": "A", "Tramea basilaris": "A", "Orthetrum brachiale": "A"};
+
+// Common name lookup (from SPECIES array already in page)
+function getCommonName(sci) {
+  const s = SPECIES.find(x => x[0] === sci);
+  return s ? s[1] : sci;
+}
+function getFamily(sci) {
+  const s = SPECIES.find(x => x[0] === sci);
+  return s ? s[2] : '';
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+let browserYear = null;
+let browserWeek = null;
+let browserMode = 'counts';  // 'counts' | 'presence'
+let browserChart = null;
+
+const YEAR_COLS = {
+  '2019':'#1e4d6b','2020':'#2d7a5a','2021':'#c8820a',
+  '2022':'#7b2d8b','2023':'#b5451b','2024':'#4a5568','2025':'#a0522d'
+};
+
+// ── Build year buttons ─────────────────────────────────────────────────────
+(function() {
+  const container = document.getElementById('yearBtns');
+  Object.keys(WEEK_SP).sort().forEach(yr => {
+    const btn = document.createElement('button');
+    btn.textContent = yr;
+    btn.dataset.yr = yr;
+    btn.style.cssText = `padding:5px 14px;font-size:12px;font-weight:600;
+      font-family:'Source Sans 3',sans-serif;border-radius:3px;cursor:pointer;
+      border:2px solid ${YEAR_COLS[yr]||'#999'};background:white;
+      color:${YEAR_COLS[yr]||'#999'};transition:all 0.15s;`;
+    btn.addEventListener('click', () => selectBrowserYear(yr));
+    container.appendChild(btn);
+  });
+})();
+
+function selectBrowserYear(yr) {
+  browserYear = yr;
+  browserWeek = null;
+  // Update button styles
+  document.querySelectorAll('#yearBtns button').forEach(btn => {
+    const col = YEAR_COLS[btn.dataset.yr] || '#999';
+    if (btn.dataset.yr === yr) {
+      btn.style.background = col;
+      btn.style.color = 'white';
+    } else {
+      btn.style.background = 'white';
+      btn.style.color = col;
+    }
+  });
+  drawBrowserChart();
+  document.getElementById('browserPanel').style.display = 'none';
+  document.getElementById('browserEmpty').style.display = 'block';
+  document.getElementById('browserEmpty').textContent =
+    `← Click a bar to see which species were recorded that week in ${yr}`;
+}
+
+function setBrowserMode(mode) {
+  browserMode = mode;
+  document.getElementById('btnCounts').style.background =
+    mode === 'counts' ? 'var(--river)' : 'white';
+  document.getElementById('btnCounts').style.color =
+    mode === 'counts' ? 'white' : 'var(--slate)';
+  document.getElementById('btnPresence').style.background =
+    mode === 'presence' ? 'var(--river)' : 'white';
+  document.getElementById('btnPresence').style.color =
+    mode === 'presence' ? 'white' : 'var(--slate)';
+  if (browserYear) drawBrowserChart();
+  if (browserWeek) renderBrowserPanel();
+}
+
+// ── Draw chart for selected year ───────────────────────────────────────────
+function drawBrowserChart() {
+  if (!browserYear) return;
+  const yearData = WEEK_SP[browserYear] || {};
+  const weeks = Object.keys(yearData).map(Number).sort((a,b)=>a-b);
+  const col = YEAR_COLS[browserYear] || '#3a7ca5';
+
+  const vals = weeks.map(w => {
+    const sp = yearData[String(w)];
+    if (browserMode === 'presence') return Object.keys(sp).length;
+    return Object.values(sp).reduce((a,b)=>a+b, 0);
+  });
+
+  // Highlight selected bar
+  const bgColors = weeks.map(w =>
+    w === browserWeek
+      ? col
+      : col + '66'
+  );
+  const borderColors = weeks.map(w =>
+    w === browserWeek ? col : col + 'aa'
+  );
+
+  if (browserChart) browserChart.destroy();
+  browserChart = new Chart(document.getElementById('browserChart'), {
+    type: 'bar',
+    data: {
+      labels: weeks.map(w => `Wk ${w}`),
+      datasets: [{
+        data: vals,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (ctx) => `IOC Week ${weeks[ctx[0].dataIndex]} — ${browserYear}`,
+            label: (ctx) => browserMode === 'presence'
+              ? `${ctx.raw} species recorded`
+              : `${ctx.raw} total records  ·  ${Object.keys(yearData[String(weeks[ctx.dataIndex])]).length} species`,
+          }
+        }
+      },
+      onClick: (evt, elements) => {
+        if (!elements.length) return;
+        const idx = elements[0].index;
+        browserWeek = weeks[idx];
+        drawBrowserChart();  // re-draw to update highlight
+        renderBrowserPanel();
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          title: {
+            display: true,
+            text: browserMode === 'presence' ? 'Species' : 'Records',
+            font: { size: 10 }
+          }
+        }
+      }
+    }
+  });
+  document.getElementById('browserChartNote').textContent =
+    `${browserYear} — ${weeks.length} weeks surveyed. Click any bar.`;
+}
+
+// ── Render species panel ───────────────────────────────────────────────────
+function renderBrowserPanel() {
+  if (!browserYear || browserWeek === null) return;
+  const yearData = WEEK_SP[browserYear] || {};
+  const weekData = yearData[String(browserWeek)] || {};
+  const search = (document.getElementById('browserSearchInput').value || '').toLowerCase();
+
+  // Sort by record count desc
+  let entries = Object.entries(weekData)
+    .map(([sci, cnt]) => ({sci, cnt, common: getCommonName(sci), sub: SUBORDER_MAP[sci]||'A', fam: getFamily(sci)}))
+    .sort((a,b) => b.cnt - a.cnt);
+
+  // Filter
+  if (search) entries = entries.filter(e =>
+    e.sci.toLowerCase().includes(search) || e.common.toLowerCase().includes(search));
+
+  const aniso = entries.filter(e => e.sub === 'A');
+  const zygo  = entries.filter(e => e.sub === 'Z');
+
+  // Determine calendar period
+  const weekNum = browserWeek;
+  // Rough month mapping
+  const weekToMonth = w => {
+    if (w <= 4)  return 'January';
+    if (w <= 8)  return 'February';
+    if (w <= 13) return 'March';
+    if (w <= 17) return 'April';
+    if (w <= 21) return 'May';
+    if (w <= 26) return 'June';
+    if (w <= 30) return 'July';
+    if (w <= 35) return 'August';
+    if (w <= 39) return 'September';
+    if (w <= 43) return 'October';
+    if (w <= 47) return 'November';
+    return 'December';
+  };
+
+  document.getElementById('browserTitle').textContent =
+    `IOC Week ${weekNum}  ·  ${browserYear}  ·  ${weekToMonth(weekNum)}`;
+  document.getElementById('browserMeta').textContent =
+    `${Object.keys(weekData).length} species  ·  ${Object.values(weekData).reduce((a,b)=>a+b,0)} records`;
+  document.getElementById('browserCount').textContent =
+    search ? `${entries.length} of ${Object.keys(weekData).length} shown` : '';
+
+  function buildList(arr, label, color) {
+    if (!arr.length) return '';
+    let html = `<div style="margin-bottom:14px;">
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+                  color:${color};border-bottom:1px solid ${color}44;padding-bottom:3px;margin-bottom:8px;">
+        ${label} (${arr.length})
+      </div>`;
+    arr.forEach(({sci, cnt, common, fam}) => {
+      const pct = Math.round((cnt / Math.max(...Object.values(weekData))) * 100);
+      html += `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;"
+             onclick="jumpToSpecies('${sci.replace(/'/g,"\'")}')">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.78rem;font-style:italic;color:var(--ink);
+                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                 title="${sci}">${sci}</div>
+            <div style="font-size:0.72rem;color:var(--slate);">${common}</div>
+          </div>
+          <div style="text-align:right;min-width:28px;">
+            ${browserMode === 'counts'
+              ? `<span style="font-family:'Fira Mono',monospace;font-size:0.8rem;font-weight:600;color:var(--ink);">${cnt}</span>`
+              : `<span style="color:${color};font-size:1rem;">●</span>`
+            }
+          </div>
+          ${browserMode === 'counts' ? `
+          <div style="width:48px;background:#eee;border-radius:2px;height:6px;flex-shrink:0;">
+            <div style="width:${pct}%;background:${color};height:6px;border-radius:2px;"></div>
+          </div>` : ''}
+        </div>`;
+    });
+    html += '</div>';
+    return html;
+  }
+
+  const col = YEAR_COLS[browserYear] || '#3a7ca5';
+  const leftHtml  = buildList(aniso, 'Anisoptera — Dragonflies', 'var(--dragonfly)');
+  const rightHtml = buildList(zygo,  'Zygoptera — Damselflies',  'var(--damselfly)');
+
+  document.getElementById('browserColumns').innerHTML =
+    `<div>${leftHtml}</div><div>${rightHtml}</div>`;
+
+  document.getElementById('browserPanel').style.display = 'block';
+  document.getElementById('browserEmpty').style.display = 'none';
+}
+
+// ── Jump from species list to Species Explorer ─────────────────────────────
+function jumpToSpecies(sci) {
+  const sel = document.getElementById('explorerSpecies');
+  if (!sel) return;
+  // Find matching option
+  for (let opt of sel.options) {
+    if (opt.value === sci) {
+      sel.value = sci;
+      updateExplorer();
+      // Scroll to the explorer
+      document.getElementById('species-weeks').scrollIntoView({behavior:'smooth'});
+      // Brief highlight flash
+      const card = document.getElementById('species-weeks');
+      card.style.outline = '2px solid var(--river)';
+      setTimeout(() => { card.style.outline = ''; }, 1800);
+      break;
+    }
+  }
+}
+</script>
+
 </body>
 </html>
