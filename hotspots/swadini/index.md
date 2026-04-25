@@ -6,6 +6,10 @@ South Africa — one of the country's most biodiverse hotspots.
 This page presents citizen science data collected over multiple survey 
 seasons, analysed and presented in collaboration with Claude AI.
 
+<img src="photos/swadini-mariepskop.jpeg" alt="Mariepskop from Swadini" width="270">
+<img src="photos/charaxes-phaeus.jpeg" alt="Charaxes phaeus (Demon Charaxes) butterfly" width="200">
+<img src="photos/swadini-lowwaterbridge-mariepskop.jpeg" alt="From low-water bridge with Mariepskop in background" width="270">
+
 ---
 
 ## 🦋 Butterflies
