@@ -12,12 +12,7 @@ seasons, analysed and presented in collaboration with Claude AI.
 <img src="photos/swadini-lowwaterbridge-mariepskop.jpeg" alt="Low water bridge" style="width:35%; height:auto;">
 </div>
 
-<div align="center">
 
-<img src="photos/swadini-mariepskop.jpeg" alt="Mariepskop from Swadini" width="270">
-<img src="photos/charaxes-phaeus.jpeg" alt="Charaxes phaeus (Demon Charaxes) butterfly" width="200">
-<img src="photos/swadini-lowwaterbridge-mariepskop.jpeg" alt="From low-water bridge with Mariepskop in background" width="270">
-</div>
 ---
 
 ## 🦋 Butterflies
