@@ -7,9 +7,9 @@ This page presents citizen science data collected over multiple survey
 seasons, analysed and presented in collaboration with Claude AI.
 
 <div style="display:flex; justify-content:center; gap:10px; flex-wrap:nowrap;">
-<img src="photos/swadini-mariepskop.jpg" alt="Mariepskop" style="width:35%; height:auto;">
-<img src="photos/charaxes-phaeus.jpg" alt="Charaxes phaeus" style="width:22%; height:auto;">
-<img src="photos/swadini-lowwaterbridge-mariepskop.jpg" alt="Low water bridge" style="width:35%; height:auto;">
+<img src="photos/swadini-mariepskop.jpeg" alt="Mariepskop" style="width:35%; height:auto;">
+<img src="photos/charaxes-phaeus.jpeg" alt="Charaxes phaeus" style="width:22%; height:auto;">
+<img src="photos/swadini-lowwaterbridge-mariepskop.jpeg" alt="Low water bridge" style="width:35%; height:auto;">
 </div>
 
 <div align="center">
