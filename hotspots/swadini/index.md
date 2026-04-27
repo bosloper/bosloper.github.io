@@ -16,7 +16,7 @@ seasons, analysed and presented in collaboration with Claude AI.
 
 ## 🐦 Birds
 - [Birds Dashboard](swadini-birds-dashboard.html)
-- [Birds Report](swadini-birds-survey-overview.pdf)
+- [Birds Report](swadini-bird-survey-overview.pdf)
 
 ## 🦋 Butterflies
 - [Butterflies Dashboard](swadini-butterflies-dashboard.html)
