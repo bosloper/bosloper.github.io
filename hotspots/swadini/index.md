@@ -16,15 +16,15 @@ seasons, analysed and presented in collaboration with Claude AI.
 
 ## 🐦 Birds
 - [Birds Dashboard](swadini-birds-dashboard.html)
-- [Birds Report](swadini-bird-survey-overview.pdf)
+- [Birds Report](swadini-bird-survey-overview.pdf) (as a download)
 
 ## 🦋 Butterflies
 - [Butterflies Dashboard](swadini-butterflies-dashboard.html)
-- [Butterflies Report](swadini-butterflies-report.pdf)
+- [Butterflies Report](swadini-butterflies-report.pdf) (as a download)
 
 ## 🪲 Odonata (Dragonflies & Damselflies)
 - [Odonata Dashboard](swadini-odonata-dashboard.html)
-- [Odonata Report](swadini-odonata-report.pdf)
+- [Odonata Report](swadini-odonata-report.pdf) (as a download)
 
 ## 🌦️ Climate
 - [Rainfall Dashboard](swadini-area-rainfall-dashboard.html)
