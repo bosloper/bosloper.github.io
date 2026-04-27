@@ -20,6 +20,9 @@ The Swadini area of the Blyde River Canyon region is one of South Africa's
 most biodiverse hotspots. The reports and dashboards below are based on
 citizen science records collected over multiple survey seasons.
 
+### Birds
+
+
 ### 🦋 Butterflies
 - [Swadini Butterflies Dashboard](/hotspots/swadini/swadini-butterflies-dashboard.html)
 - [Swadini Butterflies Report](/hotspots/swadini/swadini-butterflies-report.pdf)
