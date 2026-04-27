@@ -12,8 +12,11 @@ seasons, analysed and presented in collaboration with Claude AI.
 <img src="photos/swadini-lowwaterbridge-mariepskop.jpeg" alt="Low water bridge" style="width:35%; height:auto;">
 </div>
 
-
 ---
+
+## 🐦 Birds
+- [Birds Dashboard](swadini-birds-dashboard.html)
+- [Birds Report](swadini-birds-survey-overview.pdf)
 
 ## 🦋 Butterflies
 - [Butterflies Dashboard](swadini-butterflies-dashboard.html)
@@ -22,9 +25,6 @@ seasons, analysed and presented in collaboration with Claude AI.
 ## 🪲 Odonata (Dragonflies & Damselflies)
 - [Odonata Dashboard](swadini-odonata-dashboard.html)
 - [Odonata Report](swadini-odonata-report.pdf)
-
-## 🐦 Birds
-- *Dashboard and report coming soon*
 
 ## 🌦️ Climate
 - [Rainfall Dashboard](swadini-area-rainfall-dashboard.html)
