@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birds of Swadini — Biodiversity Survey 2019–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f7f4ee;
+    --warm: #e8e0d0;
+    --river: #3a7ca5;
+    --river-dark: #1e4d6b;
+    --river-light: #a8d4ec;
+    --amber: #c8820a;
+    --amber-light: #f5d06a;
+    --forest: #2d6a4f;
+    --forest-light: #95d5b2;
+    --rust: #a93b2a;
+    --rust-light: #f4a58a;
+    --slate: #4a5568;
+    --rule: rgba(26,26,46,0.13);
+    --shadow: 0 2px 16px rgba(26,26,46,0.09);
+    --bird1: #b5451b;
+    --bird2: #1e6b9a;
+    --bird3: #2d6a4f;
+    --bird4: #c8820a;
+    --bird5: #7b3f9e;
+    --bird6: #3a7ca5;
+    --bird7: #8b6914;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'Source Sans 3', sans-serif; font-weight: 300; line-height: 1.7; }
+
+  .masthead { background: var(--ink); color: var(--paper); padding: 52px 48px 44px; position: relative; overflow: hidden; }
+  .masthead::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(58,124,165,0.18) 0%, transparent 70%), repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px), repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.01) 80px); }
+  .masthead::after { content:'🦅'; position:absolute; right:48px; top:28px; font-size:90px; opacity:0.07; }
+  .masthead-inner { position: relative; max-width: 1200px; margin: 0 auto; }
+  .masthead-label { font-size: 11px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: var(--river-light); margin-bottom: 14px; }
+  .masthead h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem,5vw,3.6rem); font-weight: 700; line-height: 1.1; margin-bottom: 10px; }
+  .masthead h1 em { font-style: italic; color: var(--amber-light); }
+  .masthead-sub { font-size: 1rem; color: rgba(247,244,238,0.72); max-width: 620px; margin-bottom: 28px; }
+  .masthead-meta { display: flex; gap: 28px; flex-wrap: wrap; }
+  .meta-block .val { font-family: 'Fira Mono', monospace; font-size: 1.5rem; font-weight: 500; color: var(--amber-light); display: block; }
+  .meta-block .lbl { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(247,244,238,0.5); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  .section { padding: 52px 0 36px; border-bottom: 1px solid var(--rule); }
+  .section:last-child { border-bottom: none; }
+  .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--river); margin-bottom: 6px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.85rem; font-weight: 600; margin-bottom: 18px; line-height: 1.2; }
+  .section-body { font-size: 0.96rem; color: var(--slate); max-width: 820px; margin-bottom: 28px; }
+  .section-body p + p { margin-top: 10px; }
+  strong { font-weight: 600; color: var(--ink); }
+
+  .chart-grid { display: grid; gap: 22px; }
+  .chart-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .chart-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 900px) { .chart-grid.cols-2, .chart-grid.cols-3 { grid-template-columns: 1fr; } }
+  .chart-card { background: white; border: 1px solid var(--rule); border-radius: 4px; padding: 22px; box-shadow: var(--shadow); }
+  .chart-card h3 { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; margin-bottom: 3px; }
+  .chart-card .chart-note { font-size: 0.78rem; color: var(--slate); margin-bottom: 14px; font-style: italic; }
+  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap.tall { height: 340px; }
+  .chart-wrap.xtall { height: 460px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.84rem; background: white; }
+  thead th { background: var(--ink); color: var(--paper); font-family: 'Fira Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.05em; padding: 9px 12px; text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+  thead th.left { text-align: left; }
+  tr.family-row td { background: #e8e4dc; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--river-dark); padding: 4px 12px; border-top: 2px solid var(--river-light); }
+  tbody tr:hover td { background: #f0f7ff; }
+  td { padding: 2px 12px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+  td.sci { font-family: 'Fira Mono', monospace; font-size: 0.77rem; color: var(--slate); white-space: nowrap; }
+  td.center { text-align: center; }
+  td.present { background: var(--forest-light); color: var(--forest); font-weight: 600; text-align: center; font-size: 0.82rem; }
+  td.absent { background: #f5f3ee; color: #ccc; text-align: center; }
+  td.years-7 { background: #1a6b3a; color: white; font-weight: 700; text-align: center; font-size: 0.82rem; }
+  td.years-6 { background: #2d8a52; color: white; font-weight: 600; text-align: center; font-size: 0.82rem; }
+  td.years-5 { background: #52a875; color: white; text-align: center; font-size: 0.82rem; }
+  td.years-4 { background: #95d5b2; color: #1a4a2e; text-align: center; font-size: 0.82rem; }
+  td.years-3 { background: #c8ebda; color: #2d6a4f; text-align: center; font-size: 0.82rem; }
+  td.years-2 { background: #f5e6c8; color: #7a4f00; text-align: center; font-size: 0.82rem; }
+  td.years-1 { background: #fde8e0; color: #8b2a1a; text-align: center; font-size: 0.82rem; }
+
+  .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; padding: 14px 16px; background: white; border: 1px solid var(--rule); border-radius: 4px; box-shadow: var(--shadow); }
+  .filter-bar label { font-size: 0.78rem; font-weight: 600; color: var(--slate); white-space: nowrap; }
+  .filter-bar select, .filter-bar input { font-size: 0.82rem; padding: 5px 10px; border: 1px solid #ccc; border-radius: 3px; background: var(--paper); color: var(--ink); font-family: inherit; }
+  .filter-bar input[type=text] { min-width: 160px; }
+  .filter-sep { width: 1px; height: 28px; background: var(--rule); }
+  .stats-bar { font-size: 0.78rem; color: var(--slate); margin-bottom: 8px; padding: 6px 12px; background: rgba(58,124,165,0.08); border-radius: 3px; }
+  .stats-bar strong { color: var(--river-dark); }
+
+  .pheno-grid { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; box-shadow: var(--shadow); }
+  .pheno-table { width: 100%; border-collapse: collapse; background: white; font-size: 0.78rem; }
+  .pheno-table th { background: var(--ink); color: var(--paper); padding: 7px 8px; text-align: center; font-family: 'Fira Mono', monospace; font-size: 0.68rem; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+  .pheno-table th.sp-col { text-align: left; min-width: 190px; }
+  .pheno-table td { padding: 2px 4px; border-bottom: 1px solid rgba(0,0,0,0.04); text-align: center; min-width: 30px; font-size: 0.72rem; }
+  .pheno-table td.sp-name { text-align: left; padding-left: 10px; white-space: nowrap; font-size: 0.74rem; }
+  .pheno-table td.sp-sci { text-align: left; padding-left: 10px; white-space: nowrap; font-size: 0.68rem; color: var(--slate); font-family: 'Fira Mono', monospace; }
+  .pc0 { background: #f0ede8; }
+  .pc1 { background: #c8e8d8; color: #1a5a36; }
+  .pc2 { background: #94cdb0; color: #0d3d24; }
+  .pc3 { background: #5aaa88; color: white; font-weight: 600; }
+  .pc4 { background: #2d8060; color: white; font-weight: 700; }
+  .pc5 { background: #1a5c44; color: white; font-weight: 700; }
+  .pc6 { background: #0d3d2c; color: #7dd4b0; font-weight: 700; }
+  .pc7 { background: #071f16; color: #5ec99a; font-weight: 700; }
+  .pheno-table tr.family-header-row td { background: #1a1a2e; color: #a8d4ec; font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; padding: 4px 10px; text-align: left; }
+
+  .callout { border-left: 4px solid var(--river); background: rgba(58,124,165,0.07); padding: 14px 18px; border-radius: 0 4px 4px 0; margin: 18px 0; font-size: 0.91rem; }
+  .callout.amber { border-left-color: var(--amber); background: rgba(200,130,10,0.07); }
+  .callout.forest { border-left-color: var(--forest); background: rgba(45,106,79,0.07); }
+  .callout.rust { border-left-color: var(--rust); background: rgba(169,59,42,0.07); }
+  .callout-title { font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; color: var(--river-dark); }
+  .callout.amber .callout-title { color: var(--amber); }
+  .callout.forest .callout-title { color: var(--forest); }
+  .callout.rust .callout-title { color: var(--rust); }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 12px 0; font-size: 0.81rem; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 2px; }
+
+  footer { background: var(--ink); color: rgba(247,244,238,0.5); padding: 28px 48px; font-size: 0.78rem; text-align: center; margin-top: 40px; }
+  footer strong { color: var(--river-light); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-label">Citizen Science · Biodiversity Survey · Mpumalanga</div>
+    <h1>Birds of <em>Swadini</em><br>Blyde River Canyon</h1>
+    <p class="masthead-sub">Seven seasons of bird observations at Forever Resort Swadini — western bank of the Blyde River below Blyderivierspoort Dam, within the Blyde River Canyon Nature Reserve. Study area ~1.1 km². Pre-2025 observations primarily supported by photographic evidence; from 2025, photo-free recording enabled via Observation.org mobile app.</p>
+    <div class="masthead-meta">
+      <div class="meta-block"><span class="val">95</span><span class="lbl">Species recorded</span></div>
+      <div class="meta-block"><span class="val">806</span><span class="lbl">Records</span></div>
+      <div class="meta-block"><span class="val">42</span><span class="lbl">Families</span></div>
+      <div class="meta-block"><span class="val">4</span><span class="lbl">Core species (all 7 yrs)</span></div>
+      <div class="meta-block"><span class="val">2019–2025</span><span class="lbl">Survey period</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ═══ SECTION 1: OVERVIEW ═══ -->
+<div class="section">
+  <div class="section-label">Section 1</div>
+  <div class="section-title">Annual Overview — Species Richness &amp; Records</div>
+  <div class="section-body">
+    <p>Bird observations were made across seven survey seasons from May 2019 to 29 August 2025, as a secondary component of broader biodiversity surveys focused primarily on Odonata. The sparse pre-2025 record counts (27–76 per year) reflect that birds were recorded incidentally during other survey work rather than as a primary target. From 2025, the observer's use of the Observation.org mobile app enabled photo-free recording, greatly increasing the volume and consistency of bird records — 508 of the 806 total records (63%) come from 2025 alone.</p>
+    <p>The 2020 season was constrained to August–October by COVID-19 lockdown restrictions. The 2019 season included two visits: May–August and November. These coverage differences must be kept in mind when interpreting annual species counts.</p>
+  </div>
+
+  <div class="callout amber">
+    <div class="callout-title">Effort &amp; Recording Context</div>
+    The dramatic increase in 2025 records reflects a change in recording method rather than a genuine change in bird diversity. The 2025 count of 67 species is the most reliable single-season estimate; the 4 core species (present all 7 years) should be understood as a minimum — species consistently noticed even during low-effort seasons. As recording effort normalises in future years, the core count will increase substantially.
+  </div>
+
+  <div class="chart-grid cols-2" style="margin-top:24px;">
+    <div class="chart-card">
+      <h3>Species richness per year</h3>
+      <p class="chart-note">Unique species per season (normalised to species level — subspecies rolled up)</p>
+      <div class="chart-wrap tall"><canvas id="chartRichness"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Observation records per year</h3>
+      <p class="chart-note">Total records — 2025 spike reflects app-enabled photo-free recording</p>
+      <div class="chart-wrap tall"><canvas id="chartRecords"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-top:22px;">
+    <h3>Species richness per family per year — top 10 families</h3>
+    <p class="chart-note">Stacked bars showing species per family each year. Top 10 most species-rich families, with common collective names.</p>
+    <div class="chart-wrap" style="height:420px;"><canvas id="chartFamilyStack"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 2: WEEKLY HEATMAP ═══ -->
+<div class="section">
+  <div class="section-label">Section 2</div>
+  <div class="section-title">Species Diversity by IOC Week × Year</div>
+  <div class="section-body">
+    <p>The heatmap below shows the number of distinct species recorded per IOC (ISO 8601) week per year. Colour intensity reflects species richness: darker = more species. The survey window spans approximately weeks 17–35 (late April to early September) in most years, with 2019 extending to week 47 (November) and 2020 starting at week 33 (August).</p>
+    <p>The 2025 season shows consistently higher weekly counts across the entire survey window — a direct consequence of the increased recording effort enabled by the mobile app rather than a genuine ecological signal.</p>
+  </div>
+  <div class="chart-card" id="heatmap-container"></div>
+</div>
+
+<!-- ═══ SECTION 3: PRESENCE MATRIX ═══ -->
+<div class="section">
+  <div class="section-label">Section 3</div>
+  <div class="section-title">Species × Year Presence Matrix</div>
+  <div class="section-body">
+    <p>The table below shows presence (●) or absence (–) for each of the 95 species per survey year, grouped by family. The "Yrs" column shows how many of the 7 seasons each species was detected. Only <strong>4 species were recorded in all 7 seasons</strong>: Trumpeter Hornbill, Red-headed Weaver, Retz's Helmetshrike, and Cape White-eye. This low core count reflects the sparse and incidental nature of pre-2025 bird recording, not genuine absence.</p>
+    <p>Note: 2020 covered only August–October. Species with spring/early-summer phenology would be entirely absent from 2020 regardless of their true local status.</p>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:#1a6b3a"></div>7 years</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#2d8a52"></div>6</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#52a875"></div>5</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#95d5b2"></div>4</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#c8ebda"></div>3</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#f5e6c8"></div>2</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#fde8e0"></div>1 year only</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#f0ede8; border:1px solid #ccc"></div>– absent</div>
+  </div>
+
+  <div class="filter-bar">
+    <label>Search:</label>
+    <input type="text" id="filterName" placeholder="species or scientific…" oninput="applyFilters()">
+    <div class="filter-sep"></div>
+    <label>Family:</label>
+    <select id="filterFamily" onchange="applyFilters()">
+      <option value="">All families</option>
+    </select>
+    <label>Min years:</label>
+    <select id="filterMinYears" onchange="applyFilters()">
+      <option value="0">Any</option>
+      <option value="7">7 (all seasons)</option>
+      <option value="6">6+</option>
+      <option value="5">5+</option>
+      <option value="4">4+</option>
+      <option value="3">3+</option>
+      <option value="2">2+</option>
+    </select>
+    <label>Max years:</label>
+    <select id="filterMaxYears" onchange="applyFilters()">
+      <option value="7">Any</option>
+      <option value="1">1 (single-year)</option>
+      <option value="2">≤2</option>
+      <option value="3">≤3</option>
+    </select>
+  </div>
+  <div class="stats-bar" id="matrixStats"></div>
+  <div class="table-wrap" id="presenceMatrixWrap"></div>
+</div>
+
+<!-- ═══ SECTION 4: SPECIES EXPLORER ═══ -->
+<div class="section">
+  <div class="section-label">Section 4</div>
+  <div class="section-title">Species Explorer — Weekly Records by Year</div>
+  <div class="section-body">
+    <p>Select any species to display a chart of records per IOC week, with each survey year as a separate line. This reveals seasonal phenology, consistency of occurrence, and the year-to-year shift caused by recording method changes. Hover over points for exact counts.</p>
+  </div>
+  <div style="background:white; border:1px solid var(--rule); border-radius:4px; padding:24px; box-shadow:var(--shadow);">
+    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
+      <div>
+        <label style="font-size:0.8rem;font-weight:600;color:var(--slate);display:block;margin-bottom:4px;">Select species:</label>
+        <select id="explorerSpecies" onchange="updateExplorer()" style="font-size:0.9rem;padding:7px 12px;border:1px solid #ccc;border-radius:3px;background:var(--paper);color:var(--ink);font-family:inherit;min-width:280px;"></select>
+      </div>
+      <div style="font-size:0.82rem;color:var(--slate);padding-top:18px;">
+        <span id="explorerFamily" style="font-weight:600;"></span>
+      </div>
+      <div style="margin-left:auto;padding-top:18px;">
+        <label style="font-size:0.8rem;color:var(--slate);">
+          <input type="checkbox" id="explorerStacked" onchange="updateExplorer()"> Stacked bars
+        </label>
+      </div>
+    </div>
+    <div style="position:relative;height:360px;"><canvas id="chartExplorer"></canvas></div>
+    <div id="explorerSummary" style="margin-top:14px;font-size:0.82rem;color:var(--slate);display:flex;gap:24px;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 5: COMPARABLE WEEKS ═══ -->
+<div class="section">
+  <div class="section-label">Section 5</div>
+  <div class="section-title">Comparable Weeks Analysis</div>
+  <div class="section-body">
+    <p>Only IOC weeks surveyed in 5 or more of the 7 seasons are shown here — these are the most statistically comparable cross-year observations. 2020 is excluded from all lines (only 1 comparable week surveyed that year). The 2025 data is retained but should be interpreted with awareness that higher per-week counts reflect increased recording effort, not necessarily higher bird diversity.</p>
+  </div>
+  <div class="chart-card">
+    <canvas id="chartCompWeeks" height="320"></canvas>
+  </div>
+  <div class="chart-card" style="margin-top:16px;">
+    <div style="font-family:'Fira Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--slate);margin-bottom:12px">Comparable weeks detail — species per week per year</div>
+    <div style="overflow-x:auto" id="compTable"></div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 6: MONTHLY PHENOLOGY ═══ -->
+<div class="section">
+  <div class="section-label">Section 6</div>
+  <div class="section-title">Monthly Phenology — Species Activity</div>
+  <div class="section-body">
+    <p>The left chart shows monthly species richness per year. The right chart shows the full monthly breakdown averaged across all years. Note that months with sparse coverage (April, November) will show lower counts simply due to fewer survey-years in those months. The survey window (approximately May–August) is well-covered across most years.</p>
+  </div>
+  <div class="chart-grid cols-2">
+    <div class="chart-card">
+      <h3>Monthly species richness by year</h3>
+      <p class="chart-note">Each line = one year. Empty cells = month not surveyed.</p>
+      <div class="chart-wrap tall"><canvas id="chartMonthly"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Records per month — all years combined</h3>
+      <p class="chart-note">Total records per calendar month across all 7 seasons</p>
+      <div class="chart-wrap tall"><canvas id="chartMonthRecords"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 7: PHENOLOGY TABLE ═══ -->
+<div class="section">
+  <div class="section-label">Section 7</div>
+  <div class="section-title">Species × Month Phenology Table</div>
+  <div class="section-body">
+    <p>For each species, the table shows how many of the 7 survey years it was recorded in each calendar month. A cell showing "3" means detected in that month in 3 different years. Colour depth reflects frequency. Species are grouped by family.</p>
+  </div>
+  <div class="pheno-grid" id="phenoTableWrap"></div>
+</div>
+
+<!-- ═══ SECTION 8: SUMMARY & OUTLOOK ═══ -->
+<div class="section">
+  <div class="section-label">Section 8</div>
+  <div class="section-title">Summary &amp; Outlook</div>
+  <div class="section-body">
+    <p>Seven seasons of bird observations at Swadini, Blyde River Canyon Nature Reserve, have documented <strong>95 species across 42 families</strong> within a ~1.1 km² study area. The site's mixed habitat — savannah and thicket transitioning to indigenous riverine forest along the Blyde River — supports a characteristically broad assemblage spanning forest specialists (Narina Trogon, Half-collared Kingfisher, African Finfoot), open-country species (Verreaux's Eagle, African Harrier-Hawk), and a rich understorey community of bushshrikes, sunbirds, waxbills and barbets.</p>
+    <p>Recording effort was highly uneven across the survey period. From 2019 to 2024, birds were logged incidentally alongside primary Odonata surveys, producing 27–76 records per season. From 2025, a deliberate shift toward systematic weekly recording — combined with the Observation.org mobile app enabling photo-free submissions — yielded 508 records and 67 species in a single season, representing the most complete inventory of the site to date. The 4 core species recorded in all 7 seasons (Trumpeter Hornbill, Red-headed Weaver, Retz's Helmetshrike, Cape White-eye) should be understood as a floor, not a ceiling: they were noticed even during the lowest-effort seasons and form the nucleus of a much larger permanent community.</p>
+    <p>The seasonal rainfall record from the adjacent Blyderivier Botaniese Reservaat provides ecological context: the 2023/24 season was 15% below the long-term mean, with an unusually dry October–December 2023. While the direct impact on bird numbers is difficult to quantify from the existing data, the concurrent decline in butterfly and Odonata richness in 2024 is consistent with a site-wide drought response.</p>
+  </div>
+
+  <div class="callout forest">
+    <div class="callout-title">Weekly Sub-Projects — A Method for Improving Species Coverage</div>
+    <p>From 2025, the observer adopted a weekly sub-project approach: rather than recording opportunistically across the season, each IOC week is treated as a discrete unit with the explicit goal of maximising the <strong>number of species detected</strong> (not individual counts). This systematic weekly effort, combined with the mobile app, produced the dramatic increase in both records and species richness seen in 2025.</p>
+    <p style="margin-top:8px;">The method is particularly well-suited to this site: the compact ~1.1 km² area can be covered thoroughly in repeated passes within a single week, and the transition between savannah and riverine forest habitats means that brief, targeted surveys of each habitat type yield complementary species lists. Weekly sub-projects also create a consistent temporal framework that makes year-on-year comparisons more meaningful — directly comparable to the IOC-week analysis used throughout this dashboard for Odonata and butterflies.</p>
+    <p style="margin-top:8px;">As this method becomes established, the core species count is expected to grow substantially. The 2025 baseline of 67 species and 95 cumulative species will serve as the reference point against which future seasons are measured.</p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">Notable Records</div>
+    <p><strong>Pel's Fishing Owl</strong> (<em>Scotopelia peli</em>) — recorded in week 32, 2025. A large, localised owl of riparian forest; its presence confirms the quality of the riverine habitat along the Blyde River within the study area. Single-year record to date.</p>
+    <p style="margin-top:8px;"><strong>African Finfoot</strong> (<em>Podica senegalensis</em>) — recorded in 6 of 7 seasons along the Blyde River. A secretive, under-recorded species that is a reliable indicator of intact, undisturbed riverine forest. Its consistent presence at Swadini is ecologically significant.</p>
+    <p style="margin-top:8px;"><strong>Crowned Eagle</strong> (<em>Stephanoaetus coronatus</em>) — recorded in 3 seasons (2021–2023). Africa's most powerful eagle, requiring large territories and intact forest. Its occurrence at the site confirms that the canyon holds sufficient habitat and prey base to support this apex predator.</p>
+    <p style="margin-top:8px;"><strong>Narina Trogon</strong> (<em>Apaloderma narina</em>) — recorded in 5 seasons, confirming it as a regular component of the forest understorey community. One of the most sought-after forest birds in southern Africa.</p>
+  </div>
+
+  <div class="callout amber">
+    <div class="callout-title">Priorities for Future Seasons</div>
+    <ul style="list-style:none;line-height:2;font-size:0.91rem;">
+      <li>· Continue weekly sub-projects throughout the survey window to build a robust multi-year presence/absence record</li>
+      <li>· Extend coverage into September–October where possible — currently the most under-sampled period</li>
+      <li>· Target confirmed but infrequently recorded species (African Wood Owl, Thick-billed Cuckoo, Scaly-throated Honeyguide) for repeated detection to confirm residency status</li>
+      <li>· Integrate rainfall and ERA5 temperature data with annual species richness to quantify climate–biodiversity relationships</li>
+      <li>· Maintain photographic evidence for species not yet documented with photos at this site</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<footer>
+  <strong>Andries de Vries</strong> · Citizen Scientist · Middelburg, Mpumalanga<br>
+  Survey site: Swadini, Forever Resort, Blyde River Canyon Nature Reserve · ~1.1 km² · Western bank, Blyde River below Blyderivierspoort Dam<br>
+  Data: Virtual Museum (VMU), University of Cape Town (2019–2024) · Observation.org (2019–2025) · Last record: 29 August 2025<br>
+  Analysis generated by Claude (Anthropic) · April 2026
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════════
+const YEARS = [2019,2020,2021,2022,2023,2024,2025];
+const YEAR_COLORS = ['#b5451b','#1e6b9a','#2d6a4f','#c8820a','#7b3f9e','#3a7ca5','#8b6914'];
+
+const RICHNESS = {"2019":47,"2020":23,"2021":35,"2022":25,"2023":38,"2024":46,"2025":67};
+const RECORDS = {"2019":65,"2020":27,"2021":43,"2022":35,"2023":52,"2024":76,"2025":508};
+
+const WEEK_YEAR = [{"year":2019,"ioc_week":18,"n_species":1},{"year":2019,"ioc_week":19,"n_species":1},{"year":2019,"ioc_week":20,"n_species":2},{"year":2019,"ioc_week":21,"n_species":3},{"year":2019,"ioc_week":22,"n_species":21},{"year":2019,"ioc_week":23,"n_species":1},{"year":2019,"ioc_week":25,"n_species":2},{"year":2019,"ioc_week":27,"n_species":1},{"year":2019,"ioc_week":28,"n_species":12},{"year":2019,"ioc_week":29,"n_species":4},{"year":2019,"ioc_week":30,"n_species":5},{"year":2019,"ioc_week":31,"n_species":6},{"year":2019,"ioc_week":45,"n_species":1},{"year":2019,"ioc_week":46,"n_species":2},{"year":2019,"ioc_week":47,"n_species":1},{"year":2020,"ioc_week":33,"n_species":4},{"year":2020,"ioc_week":34,"n_species":1},{"year":2020,"ioc_week":35,"n_species":6},{"year":2020,"ioc_week":37,"n_species":3},{"year":2020,"ioc_week":38,"n_species":3},{"year":2020,"ioc_week":40,"n_species":1},{"year":2020,"ioc_week":41,"n_species":4},{"year":2020,"ioc_week":42,"n_species":4},{"year":2021,"ioc_week":17,"n_species":1},{"year":2021,"ioc_week":19,"n_species":1},{"year":2021,"ioc_week":21,"n_species":1},{"year":2021,"ioc_week":22,"n_species":3},{"year":2021,"ioc_week":24,"n_species":2},{"year":2021,"ioc_week":25,"n_species":3},{"year":2021,"ioc_week":26,"n_species":4},{"year":2021,"ioc_week":27,"n_species":6},{"year":2021,"ioc_week":28,"n_species":2},{"year":2021,"ioc_week":29,"n_species":3},{"year":2021,"ioc_week":30,"n_species":6},{"year":2021,"ioc_week":31,"n_species":3},{"year":2021,"ioc_week":32,"n_species":1},{"year":2021,"ioc_week":34,"n_species":4},{"year":2021,"ioc_week":35,"n_species":2},{"year":2022,"ioc_week":17,"n_species":1},{"year":2022,"ioc_week":18,"n_species":2},{"year":2022,"ioc_week":20,"n_species":1},{"year":2022,"ioc_week":22,"n_species":2},{"year":2022,"ioc_week":23,"n_species":1},{"year":2022,"ioc_week":24,"n_species":2},{"year":2022,"ioc_week":25,"n_species":3},{"year":2022,"ioc_week":26,"n_species":1},{"year":2022,"ioc_week":27,"n_species":5},{"year":2022,"ioc_week":28,"n_species":6},{"year":2022,"ioc_week":29,"n_species":1},{"year":2022,"ioc_week":30,"n_species":4},{"year":2022,"ioc_week":31,"n_species":1},{"year":2022,"ioc_week":33,"n_species":2},{"year":2022,"ioc_week":34,"n_species":2},{"year":2023,"ioc_week":17,"n_species":2},{"year":2023,"ioc_week":18,"n_species":1},{"year":2023,"ioc_week":19,"n_species":1},{"year":2023,"ioc_week":20,"n_species":1},{"year":2023,"ioc_week":21,"n_species":4},{"year":2023,"ioc_week":22,"n_species":3},{"year":2023,"ioc_week":24,"n_species":3},{"year":2023,"ioc_week":25,"n_species":1},{"year":2023,"ioc_week":26,"n_species":1},{"year":2023,"ioc_week":28,"n_species":5},{"year":2023,"ioc_week":29,"n_species":3},{"year":2023,"ioc_week":30,"n_species":8},{"year":2023,"ioc_week":31,"n_species":4},{"year":2023,"ioc_week":32,"n_species":2},{"year":2023,"ioc_week":33,"n_species":8},{"year":2023,"ioc_week":34,"n_species":3},{"year":2024,"ioc_week":17,"n_species":4},{"year":2024,"ioc_week":19,"n_species":4},{"year":2024,"ioc_week":20,"n_species":7},{"year":2024,"ioc_week":21,"n_species":11},{"year":2024,"ioc_week":22,"n_species":1},{"year":2024,"ioc_week":23,"n_species":1},{"year":2024,"ioc_week":24,"n_species":7},{"year":2024,"ioc_week":25,"n_species":2},{"year":2024,"ioc_week":26,"n_species":8},{"year":2024,"ioc_week":27,"n_species":6},{"year":2024,"ioc_week":28,"n_species":2},{"year":2024,"ioc_week":29,"n_species":9},{"year":2024,"ioc_week":30,"n_species":10},{"year":2024,"ioc_week":31,"n_species":2},{"year":2025,"ioc_week":18,"n_species":10},{"year":2025,"ioc_week":19,"n_species":15},{"year":2025,"ioc_week":20,"n_species":30},{"year":2025,"ioc_week":21,"n_species":21},{"year":2025,"ioc_week":22,"n_species":21},{"year":2025,"ioc_week":23,"n_species":22},{"year":2025,"ioc_week":24,"n_species":16},{"year":2025,"ioc_week":25,"n_species":17},{"year":2025,"ioc_week":26,"n_species":29},{"year":2025,"ioc_week":27,"n_species":12},{"year":2025,"ioc_week":29,"n_species":19},{"year":2025,"ioc_week":30,"n_species":23},{"year":2025,"ioc_week":31,"n_species":25},{"year":2025,"ioc_week":32,"n_species":30},{"year":2025,"ioc_week":33,"n_species":34},{"year":2025,"ioc_week":34,"n_species":25},{"year":2025,"ioc_week":35,"n_species":27}];
+
+const TOP_FAMS = ["Estrildidae","Muscicapidae","Malaconotidae","Nectariniidae","Accipitridae","Alcedinidae","Cisticolidae","Pycnonotidae","Ploceidae","Lybiidae"];
+const FAM_LABELS = ["Estrildidae (Waxbills & Firefinches)","Muscicapidae (Chats & Flycatchers)","Malaconotidae (Bushshrikes)","Nectariniidae (Sunbirds)","Accipitridae (Eagles & Hawks)","Alcedinidae (Kingfishers)","Cisticolidae (Cisticolas & Allies)","Pycnonotidae (Bulbuls & Greenbuls)","Ploceidae (Weavers)","Lybiidae (African Barbets)"];
+const FAM_COLORS = ['#b5451b','#1e6b9a','#2d6a4f','#c8820a','#7b3f9e','#3a7ca5','#8b6914','#a93b2a','#4a5568','#1e4d6b'];
+
+const FAM_YEAR = {"2019":{"Estrildidae":5,"Muscicapidae":4,"Malaconotidae":3,"Nectariniidae":2,"Accipitridae":3,"Alcedinidae":3,"Cisticolidae":3,"Pycnonotidae":1,"Ploceidae":1,"Lybiidae":1},"2020":{"Estrildidae":3,"Muscicapidae":1,"Malaconotidae":1,"Nectariniidae":1,"Accipitridae":2,"Alcedinidae":2,"Cisticolidae":0,"Pycnonotidae":0,"Ploceidae":1,"Lybiidae":1},"2021":{"Estrildidae":3,"Muscicapidae":2,"Malaconotidae":1,"Nectariniidae":2,"Accipitridae":3,"Alcedinidae":1,"Cisticolidae":2,"Pycnonotidae":1,"Ploceidae":1,"Lybiidae":1},"2022":{"Estrildidae":1,"Muscicapidae":1,"Malaconotidae":1,"Nectariniidae":0,"Accipitridae":1,"Alcedinidae":1,"Cisticolidae":2,"Pycnonotidae":0,"Ploceidae":1,"Lybiidae":0},"2023":{"Estrildidae":1,"Muscicapidae":2,"Malaconotidae":1,"Nectariniidae":4,"Accipitridae":3,"Alcedinidae":2,"Cisticolidae":1,"Pycnonotidae":1,"Ploceidae":1,"Lybiidae":2},"2024":{"Estrildidae":1,"Muscicapidae":4,"Malaconotidae":4,"Nectariniidae":4,"Accipitridae":1,"Alcedinidae":1,"Cisticolidae":3,"Pycnonotidae":3,"Ploceidae":2,"Lybiidae":3},"2025":{"Estrildidae":6,"Muscicapidae":7,"Malaconotidae":3,"Nectariniidae":5,"Accipitridae":4,"Alcedinidae":3,"Cisticolidae":2,"Pycnonotidae":3,"Ploceidae":3,"Lybiidae":2}};
+
+const MATRIX = {"Hedydipna collaris":{"common":"Collared Sunbird","family":"Nectariniidae","seen":[2019,2020,2023,2024,2025],"absent":[2021,2022],"n_years":5},"Bycanistes bucinator":{"common":"Trumpeter Hornbill","family":"Bucerotidae","seen":[2019,2020,2021,2022,2023,2024,2025],"absent":[],"n_years":7},"Apalis flavida":{"common":"Yellow-breasted Apalis","family":"Cisticolidae","seen":[2019,2021,2022,2024,2025],"absent":[2020,2023],"n_years":5},"Fraseria caerulescens":{"common":"Ashy Flycatcher","family":"Muscicapidae","seen":[2019,2020,2021,2023,2024,2025],"absent":[2022],"n_years":6},"Lagonosticta senegala":{"common":"Red-billed Firefinch","family":"Estrildidae","seen":[2019,2020,2021,2022,2025],"absent":[2023,2024],"n_years":5},"Motacilla aguimp":{"common":"African Pied Wagtail","family":"Motacillidae","seen":[2019,2020,2021,2023,2024,2025],"absent":[2022],"n_years":6},"Alcedo semitorquata":{"common":"Half-collared Kingfisher","family":"Alcedinidae","seen":[2019,2020,2021,2025],"absent":[2022,2023,2024],"n_years":4},"Pycnonotus barbatus":{"common":"Common Bulbul","family":"Pycnonotidae","seen":[2019,2021,2023,2024,2025],"absent":[2020,2022],"n_years":5},"Anaplectes rubriceps":{"common":"Red-headed Weaver","family":"Ploceidae","seen":[2019,2020,2021,2022,2023,2024,2025],"absent":[],"n_years":7},"Malaconotus blanchoti":{"common":"Grey-headed Bushshrike","family":"Malaconotidae","seen":[2019,2024,2025],"absent":[2020,2021,2022,2023],"n_years":3},"Halcyon chelicuti":{"common":"Striped Kingfisher","family":"Alcedinidae","seen":[2019],"absent":[2020,2021,2022,2023,2024,2025],"n_years":1},"Prionops retzii":{"common":"Retz's Helmetshrike","family":"Vangidae","seen":[2019,2020,2021,2022,2023,2024,2025],"absent":[],"n_years":7},"Aquila verreauxii":{"common":"Verreaux's Eagle","family":"Accipitridae","seen":[2019,2023,2025],"absent":[2020,2021,2022,2024],"n_years":3},"Streptopelia semitorquata":{"common":"Red-eyed Dove","family":"Columbidae","seen":[2019,2025],"absent":[2020,2021,2022,2023,2024],"n_years":2},"Emberiza flaviventris":{"common":"Golden-breasted Bunting","family":"Emberizidae","seen":[2019,2022,2023],"absent":[2020,2021,2024,2025],"n_years":3},"Spermestes bicolor":{"common":"Black-and-white Mannikin","family":"Estrildidae","seen":[2019,2023],"absent":[2020,2021,2022,2024,2025],"n_years":2},"Podica senegalensis":{"common":"African Finfoot","family":"Heliornithidae","seen":[2019,2021,2022,2023,2024,2025],"absent":[2020],"n_years":6},"Cinnyris talatala":{"common":"White-bellied Sunbird","family":"Nectariniidae","seen":[2019,2023,2024,2025],"absent":[2020,2021,2022],"n_years":4},"Lybius torquatus":{"common":"Black-collared Barbet","family":"Lybiidae","seen":[2019,2021,2023,2024,2025],"absent":[2020,2022],"n_years":5},"Uraeginthus angolensis":{"common":"Blue Waxbill","family":"Estrildidae","seen":[2019,2020,2021,2024,2025],"absent":[2022,2023],"n_years":5},"Phalacrocorax carbo":{"common":"Great Cormorant","family":"Phalacrocoracidae","seen":[2019,2023],"absent":[2020,2021,2022,2024,2025],"n_years":2},"Dessonornis humeralis":{"common":"White-throated Robin-Chat","family":"Muscicapidae","seen":[2019,2021,2022,2024,2025],"absent":[2020,2023],"n_years":5},"Zosterops virens":{"common":"Cape White-eye","family":"Zosteropidae","seen":[2019,2020,2021,2022,2023,2024,2025],"absent":[],"n_years":7},"Crithagra mozambica":{"common":"Yellow-fronted Canary","family":"Fringillidae","seen":[2019,2021,2022,2024],"absent":[2020,2023,2025],"n_years":4},"Tychaedon quadrivirgata":{"common":"Bearded Scrub Robin","family":"Muscicapidae","seen":[2019,2023,2024,2025],"absent":[2020,2021,2022],"n_years":4},"Prinia subflava":{"common":"Tawny-flanked Prinia","family":"Cisticolidae","seen":[2019,2021,2022,2023,2024],"absent":[2020,2025],"n_years":5},"Turdus libonyana":{"common":"Kurrichane Thrush","family":"Turdidae","seen":[2019,2022,2023,2024,2025],"absent":[2020,2021],"n_years":5},"Lagonosticta rhodopareia":{"common":"Jameson's Firefinch","family":"Estrildidae","seen":[2019,2025],"absent":[2020,2021,2022,2023,2024],"n_years":2},"Alopochen aegyptiaca":{"common":"Egyptian Goose","family":"Anatidae","seen":[2019,2021,2024,2025],"absent":[2020,2022,2023],"n_years":4},"Fraseria plumbea":{"common":"Grey Tit-Flycatcher","family":"Muscicapidae","seen":[2019,2025],"absent":[2020,2021,2022,2023,2024],"n_years":2},"Prionops plumatus":{"common":"White-crested Helmetshrike","family":"Vangidae","seen":[2019,2022,2023,2024,2025],"absent":[2020,2021],"n_years":5},"Scopus umbretta":{"common":"Hamerkop","family":"Scopidae","seen":[2019,2021,2022,2023,2025],"absent":[2020,2024],"n_years":5},"Treron calvus":{"common":"African Green Pigeon","family":"Columbidae","seen":[2019,2021,2022,2023,2025],"absent":[2020,2024],"n_years":5},"Apaloderma narina":{"common":"Narina Trogon","family":"Trogonidae","seen":[2019,2021,2022,2023,2024],"absent":[2020,2025],"n_years":5},"Camaroptera brachyura":{"common":"Bleating Camaroptera","family":"Cisticolidae","seen":[2019,2024,2025],"absent":[2020,2021,2022,2023],"n_years":3},"Gallirex porphyreolophus":{"common":"Purple-crested Turaco","family":"Musophagidae","seen":[2019,2020,2021,2024,2025],"absent":[2022,2023],"n_years":5},"Megaceryle maxima":{"common":"Giant Kingfisher","family":"Alcedinidae","seen":[2019,2020,2023,2025],"absent":[2021,2022,2024],"n_years":4},"Spermestes cucullata":{"common":"Bronze Mannikin","family":"Estrildidae","seen":[2019,2021],"absent":[2020,2022,2023,2024,2025],"n_years":2},"Dryoscopus cubla":{"common":"Black-backed Puffback","family":"Malaconotidae","seen":[2019,2020,2022,2023,2024,2025],"absent":[2021],"n_years":6},"Onychognathus morio":{"common":"Red-winged Starling","family":"Sturnidae","seen":[2019,2021,2024,2025],"absent":[2020,2022,2023],"n_years":4},"Oriolus larvatus":{"common":"Black-headed Oriole","family":"Oriolidae","seen":[2019,2023,2025],"absent":[2020,2021,2022,2024],"n_years":3},"Crithagra gularis":{"common":"Streaky-headed Seedeater","family":"Fringillidae","seen":[2019],"absent":[2020,2021,2022,2023,2024,2025],"n_years":1},"Polyboroides typus":{"common":"African Harrier-Hawk","family":"Accipitridae","seen":[2019,2025],"absent":[2020,2021,2022,2023,2024],"n_years":2},"Aerospiza tachiro":{"common":"African Goshawk","family":"Accipitridae","seen":[2019,2020,2021,2023,2024,2025],"absent":[2022],"n_years":6},"Chlorophoneus sulfureopectus":{"common":"Orange-breasted Bushshrike","family":"Malaconotidae","seen":[2019],"absent":[2020,2021,2022,2023,2024,2025],"n_years":1},"Cecropis abyssinica":{"common":"Lesser Striped Swallow","family":"Hirundinidae","seen":[2019,2020],"absent":[2021,2022,2023,2024,2025],"n_years":2},"Strix woodfordii":{"common":"African Wood Owl","family":"Strigidae","seen":[2019,2020,2021,2025],"absent":[2022,2023,2024],"n_years":4},"Icthyophaga vocifer":{"common":"African Fish Eagle","family":"Accipitridae","seen":[2020,2021,2025],"absent":[2019,2022,2023,2024],"n_years":3},"Coccopygia melanotis":{"common":"Swee Waxbill","family":"Estrildidae","seen":[2020],"absent":[2019,2021,2022,2023,2024,2025],"n_years":1},"Motacilla clara":{"common":"Mountain Wagtail","family":"Motacillidae","seen":[2020,2022,2023],"absent":[2019,2021,2024,2025],"n_years":3},"Campephaga flava":{"common":"Black Cuckooshrike","family":"Campephagidae","seen":[2020,2021],"absent":[2019,2022,2023,2024,2025],"n_years":2},"Pogoniulus bilineatus":{"common":"Yellow-rumped Tinkerbird","family":"Lybiidae","seen":[2020,2024],"absent":[2019,2021,2022,2023,2025],"n_years":2},"Microcarbo africanus":{"common":"Reed Cormorant","family":"Phalacrocoracidae","seen":[2020],"absent":[2019,2021,2022,2023,2024,2025],"n_years":1},"Numida meleagris":{"common":"Helmeted Guineafowl","family":"Numididae","seen":[2020,2021,2022,2024,2025],"absent":[2019,2023],"n_years":5},"Cinnyris afer":{"common":"Greater Double-collared Sunbird","family":"Nectariniidae","seen":[2021,2023],"absent":[2019,2020,2022,2024,2025],"n_years":2},"Passer diffusus":{"common":"Southern Grey-headed Sparrow","family":"Passeridae","seen":[2021],"absent":[2019,2020,2022,2023,2024,2025],"n_years":1},"Chalcomitra senegalensis":{"common":"Scarlet-chested Sunbird","family":"Nectariniidae","seen":[2021,2024,2025],"absent":[2019,2020,2022,2023],"n_years":3},"Stephanoaetus coronatus":{"common":"Crowned Eagle","family":"Accipitridae","seen":[2021,2022,2023],"absent":[2019,2020,2024,2025],"n_years":3},"Tchagra australis":{"common":"Brown-crowned Tchagra","family":"Malaconotidae","seen":[2021],"absent":[2019,2020,2022,2023,2024,2025],"n_years":1},"Indicator variegatus":{"common":"Scaly-throated Honeyguide","family":"Indicatoridae","seen":[2021],"absent":[2019,2020,2022,2023,2024,2025],"n_years":1},"Tockus leucomelas":{"common":"Southern Yellow-billed Hornbill","family":"Bucerotidae","seen":[2021,2023],"absent":[2019,2020,2022,2024,2025],"n_years":2},"Pachycoccyx audeberti":{"common":"Thick-billed Cuckoo","family":"Cuculidae","seen":[2022,2024,2025],"absent":[2019,2020,2021,2023],"n_years":3},"Halcyon albiventris":{"common":"Brown-hooded Kingfisher","family":"Alcedinidae","seen":[2022,2023,2024,2025],"absent":[2019,2020,2021],"n_years":4},"Falco peregrinus":{"common":"Peregrine Falcon","family":"Falconidae","seen":[2022],"absent":[2019,2020,2021,2023,2024,2025],"n_years":1},"Bostrychia hagedash":{"common":"Hadada Ibis","family":"Threskiornithidae","seen":[2022,2023,2025],"absent":[2019,2020,2021,2024],"n_years":3},"Campethera abingoni":{"common":"Golden-tailed Woodpecker","family":"Picidae","seen":[2022,2023,2024,2025],"absent":[2019,2020,2021],"n_years":4},"Phoeniculus purpureus":{"common":"Green Wood Hoopoe","family":"Phoeniculidae","seen":[2023,2024,2025],"absent":[2019,2020,2021,2022],"n_years":3},"Anhinga rufa":{"common":"African Darter","family":"Anhingidae","seen":[2023],"absent":[2019,2020,2021,2022,2024,2025],"n_years":1},"Chalcomitra amethystina":{"common":"Amethyst Sunbird","family":"Nectariniidae","seen":[2023,2024,2025],"absent":[2019,2020,2021,2022],"n_years":3},"Pogoniulus chrysoconus":{"common":"Yellow-fronted Tinkerbird","family":"Lybiidae","seen":[2023,2024,2025],"absent":[2019,2020,2021,2022],"n_years":3},"Chrysococcyx klaas":{"common":"Klaas's Cuckoo","family":"Cuculidae","seen":[2023],"absent":[2019,2020,2021,2022,2024,2025],"n_years":1},"Sylvietta rufescens":{"common":"Long-billed Crombec","family":"Macrosphenidae","seen":[2024,2025],"absent":[2019,2020,2021,2022,2023],"n_years":2},"Ploceus ocularis":{"common":"Spectacled Weaver","family":"Ploceidae","seen":[2024,2025],"absent":[2019,2020,2021,2022,2023],"n_years":2},"Tchagra senegalus":{"common":"Black-crowned Tchagra","family":"Malaconotidae","seen":[2024],"absent":[2019,2020,2021,2022,2023,2025],"n_years":1},"Andropadus importunus":{"common":"Sombre Greenbul","family":"Pycnonotidae","seen":[2024,2025],"absent":[2019,2020,2021,2022,2023],"n_years":2},"Colius striatus":{"common":"Speckled Mousebird","family":"Coliidae","seen":[2024,2025],"absent":[2019,2020,2021,2022,2023],"n_years":2},"Telophorus viridis":{"common":"Gorgeous Bushshrike","family":"Malaconotidae","seen":[2024],"absent":[2019,2020,2021,2022,2023,2025],"n_years":1},"Chlorocichla flaviventris":{"common":"Yellow-bellied Greenbul","family":"Pycnonotidae","seen":[2024,2025],"absent":[2019,2020,2021,2022,2023],"n_years":2},"Prodotiscus regulus":{"common":"Brown-backed Honeybird","family":"Indicatoridae","seen":[2024,2025],"absent":[2019,2020,2021,2022,2023],"n_years":2},"Batis molitor":{"common":"Chinspot Batis","family":"Platysteiridae","seen":[2024],"absent":[2019,2020,2021,2022,2023,2025],"n_years":1},"Cercotrichas leucophrys":{"common":"White-browed Scrub Robin","family":"Muscicapidae","seen":[2024,2025],"absent":[2019,2020,2021,2022,2023],"n_years":2},"Turtur chalcospilos":{"common":"Emerald-spotted Wood Dove","family":"Columbidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Laniarius ferrugineus":{"common":"Southern Boubou","family":"Malaconotidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Muscicapa adusta":{"common":"African Dusky Flycatcher","family":"Muscicapidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Estrilda astrild":{"common":"Common Waxbill","family":"Estrildidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Lagonosticta rubricata":{"common":"African Firefinch","family":"Estrildidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Cinnyris mariquensis":{"common":"Marico Sunbird","family":"Nectariniidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Cossypha natalensis":{"common":"Red-capped Robin-Chat","family":"Muscicapidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Pytilia melba":{"common":"Green-winged Pytilia","family":"Estrildidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Emberiza tahapisi":{"common":"Cinnamon-breasted Bunting","family":"Emberizidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Ploceus cucullatus":{"common":"Village Weaver","family":"Ploceidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Dicrurus adsimilis":{"common":"Fork-tailed Drongo","family":"Dicruridae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Centropus burchellii":{"common":"Burchell's Coucal","family":"Cuculidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Indicator minor":{"common":"Lesser Honeyguide","family":"Indicatoridae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1},"Scotopelia peli":{"common":"Pel's Fishing Owl","family":"Strigidae","seen":[2025],"absent":[2019,2020,2021,2022,2023,2024],"n_years":1}};
+
+const SP_WEEK_YEAR = {"Hedydipna collaris":{"2019":{"18":1,"22":1,"28":1},"2020":{"41":1},"2023":{"28":1},"2024":{"24":2},"2025":{"19":1,"21":3,"23":1,"32":1,"33":1,"34":1}},"Bycanistes bucinator":{"2019":{"19":1,"29":1},"2020":{"35":1,"41":1},"2021":{"24":1},"2022":{"27":1},"2023":{"33":1,"34":1},"2024":{"21":1,"28":1},"2025":{"21":2,"22":1,"24":1,"25":1,"26":2,"29":1,"30":2,"31":2,"32":2,"33":3,"35":1}},"Apalis flavida":{"2019":{"20":1},"2021":{"22":1},"2022":{"20":1},"2024":{"25":1,"30":1},"2025":{"19":1,"20":2,"22":1,"23":1,"26":1,"27":1,"31":1,"32":2}},"Fraseria caerulescens":{"2019":{"20":1,"22":1},"2020":{"33":1},"2021":{"25":1,"30":1},"2023":{"20":1,"21":1},"2024":{"20":1},"2025":{"19":2,"20":2,"21":1,"23":1,"25":2,"26":2,"29":1,"30":1,"31":1,"33":1}},"Lagonosticta senegala":{"2019":{"21":1},"2020":{"35":1},"2021":{"27":1,"28":1,"30":1},"2022":{"31":1},"2025":{"22":2,"23":2,"24":1,"34":1}},"Motacilla aguimp":{"2019":{"21":1},"2020":{"33":1},"2021":{"19":1,"34":1},"2023":{"18":1,"30":1},"2024":{"17":1,"24":1},"2025":{"19":1,"20":1,"30":2,"33":1,"35":1}},"Alcedo semitorquata":{"2019":{"21":1,"22":2},"2020":{"42":1},"2021":{"21":1,"22":1},"2025":{"30":1}},"Pycnonotus barbatus":{"2019":{"22":2,"30":1},"2021":{"26":1},"2023":{"33":1},"2024":{"29":1},"2025":{"18":1,"20":2,"22":2,"23":2,"24":1,"26":2,"27":1,"29":2,"31":1,"33":2,"35":1}},"Anaplectes rubriceps":{"2019":{"22":1,"31":1},"2020":{"33":1},"2021":{"29":1},"2022":{"27":1},"2023":{"30":1},"2024":{"26":1,"27":1,"30":1},"2025":{"26":1,"30":1,"32":1,"33":1}},"Malaconotus blanchoti":{"2019":{"22":1},"2024":{"26":1},"2025":{"20":3,"22":1,"25":1,"27":1,"29":1,"31":1,"32":1,"35":1}},"Halcyon chelicuti":{"2019":{"22":1}},"Prionops retzii":{"2019":{"22":1,"28":1},"2020":{"37":1},"2021":{"30":1},"2022":{"25":1,"28":1},"2023":{"29":1},"2024":{"20":1,"26":1,"28":1,"29":1},"2025":{"26":1,"30":1,"31":1,"33":1,"34":2}},"Aquila verreauxii":{"2019":{"22":1},"2023":{"17":1},"2025":{"29":1}},"Streptopelia semitorquata":{"2019":{"22":1},"2025":{"19":1,"20":2,"21":1,"23":1,"26":2,"29":1,"31":1,"33":1,"34":1}},"Emberiza flaviventris":{"2019":{"22":1},"2022":{"26":1},"2023":{"24":1,"29":1}},"Spermestes bicolor":{"2019":{"22":1,"31":1},"2023":{"33":1}},"Podica senegalensis":{"2019":{"22":1},"2021":{"30":1},"2022":{"17":1,"18":1,"25":1,"27":1,"30":1,"34":1},"2023":{"26":1,"30":1},"2024":{"17":1},"2025":{"31":1}},"Cinnyris talatala":{"2019":{"22":1},"2023":{"19":1},"2024":{"20":1,"27":1},"2025":{"19":1,"20":1,"26":1,"33":1,"34":1}},"Lybius torquatus":{"2019":{"22":1,"31":1},"2021":{"29":1},"2023":{"31":1},"2024":{"19":1},"2025":{"18":1,"19":2,"20":2,"21":1,"22":1,"23":2,"24":1,"26":3,"29":1,"30":1,"31":2,"32":2,"33":2}},"Uraeginthus angolensis":{"2019":{"22":1,"31":1},"2020":{"35":1},"2021":{"27":1},"2024":{"19":1},"2025":{"20":2,"21":1,"27":1,"29":1,"32":1,"34":1}},"Phalacrocorax carbo":{"2019":{"22":1},"2023":{"22":1}},"Dessonornis humeralis":{"2019":{"22":1},"2021":{"26":1,"34":1},"2022":{"27":1,"30":1},"2024":{"21":1,"29":1},"2025":{"20":1,"22":1}},"Zosterops virens":{"2019":{"22":1,"28":1,"47":1},"2020":{"35":1},"2021":{"27":1},"2022":{"33":1},"2023":{"34":1},"2024":{"21":1,"24":1,"27":1},"2025":{"25":3,"32":2,"33":1,"34":2}},"Crithagra mozambica":{"2019":{"22":1},"2021":{"35":1},"2022":{"18":1,"28":1},"2024":{"20":1,"26":1}},"Tychaedon quadrivirgata":{"2019":{"22":1},"2023":{"28":1,"30":1},"2024":{"19":1,"21":1,"27":2,"29":1},"2025":{"21":1,"30":2,"31":1,"33":1,"34":1}},"Prinia subflava":{"2019":{"23":1},"2021":{"27":1},"2022":{"28":1},"2023":{"29":1},"2024":{"29":1}},"Turdus libonyana":{"2019":{"25":1},"2022":{"33":1},"2023":{"32":2},"2024":{"24":1},"2025":{"20":3,"23":1,"24":1,"25":1,"26":1,"30":2,"32":2,"33":1,"34":1,"35":1}},"Lagonosticta rhodopareia":{"2019":{"25":1,"28":1},"2025":{"26":3,"27":1}},"Alopochen aegyptiaca":{"2019":{"27":1},"2021":{"35":1},"2024":{"17":1},"2025":{"20":1,"23":1,"25":1,"30":1,"33":1,"34":1}},"Fraseria plumbea":{"2019":{"28":1},"2025":{"20":1}},"Prionops plumatus":{"2019":{"28":1,"30":1},"2022":{"28":1},"2023":{"24":1},"2024":{"24":1,"27":1,"29":1},"2025":{"30":1,"32":4,"33":1,"35":1}},"Scopus umbretta":{"2019":{"28":1},"2021":{"27":1},"2022":{"30":1},"2023":{"22":1,"28":1,"31":1},"2025":{"19":1,"20":1,"22":1,"23":2,"26":1,"29":1,"31":1,"32":1,"33":1,"34":1,"35":2}},"Treron calvus":{"2019":{"28":1},"2021":{"24":1},"2022":{"23":2},"2023":{"28":1},"2025":{"18":1,"20":1,"21":1,"23":2,"24":1,"25":2,"26":1,"29":1,"30":1,"31":1,"32":1,"33":2,"34":1,"35":1}},"Apaloderma narina":{"2019":{"28":1},"2021":{"29":1},"2022":{"29":1},"2023":{"21":1},"2024":{"20":1}},"Camaroptera brachyura":{"2019":{"28":1},"2024":{"25":1,"26":1,"30":1},"2025":{"20":2,"22":1,"23":1,"25":1,"29":1,"30":1,"32":1,"35":1}},"Gallirex porphyreolophus":{"2019":{"28":1,"45":1},"2020":{"41":1},"2021":{"17":1,"26":1},"2024":{"20":1,"27":1},"2025":{"18":1,"19":2,"20":2,"21":1,"23":1,"25":2,"26":2,"27":1,"29":2,"30":2,"31":2,"33":3,"34":1,"35":1}},"Megaceryle maxima":{"2019":{"28":1},"2020":{"42":1},"2023":{"25":1},"2025":{"19":1,"20":1,"26":2,"27":1,"29":1,"33":2,"35":1}},"Spermestes cucullata":{"2019":{"29":1},"2021":{"34":1}},"Dryoscopus cubla":{"2019":{"29":1},"2020":{"33":1},"2022":{"22":1},"2023":{"30":1},"2024":{"17":1,"21":1},"2025":{"20":2,"22":2,"23":1,"24":2,"26":1,"30":2,"31":1,"32":2,"33":1,"34":1,"35":1}},"Onychognathus morio":{"2019":{"29":1},"2021":{"34":1},"2024":{"24":1},"2025":{"18":3,"20":1,"21":1,"24":1,"25":1,"26":3,"27":1,"29":1,"32":1,"33":2,"35":1}},"Oriolus larvatus":{"2019":{"30":1},"2023":{"24":1,"33":1},"2025":{"20":1,"22":2,"25":1,"26":1,"27":1,"29":1,"30":2,"31":1,"32":1,"33":2,"35":1}},"Crithagra gularis":{"2019":{"30":1}},"Polyboroides typus":{"2019":{"30":1},"2025":{"22":2}},"Aerospiza tachiro":{"2019":{"31":1},"2020":{"38":1},"2021":{"28":1},"2023":{"33":1},"2024":{"22":1},"2025":{"33":1,"34":1}},"Chlorophoneus sulfureopectus":{"2019":{"31":1}},"Cecropis abyssinica":{"2019":{"46":1},"2020":{"41":2}},"Strix woodfordii":{"2019":{"46":1},"2020":{"34":1},"2021":{"22":1},"2025":{"18":2,"21":2,"23":2,"26":1,"32":1,"34":2,"35":1}},"Icthyophaga vocifer":{"2020":{"35":1,"38":1},"2021":{"25":1},"2025":{"18":1,"20":1,"21":1,"24":1,"26":2,"29":2,"30":1,"31":1,"33":2,"35":1}},"Coccopygia melanotis":{"2020":{"35":1,"38":1}},"Motacilla clara":{"2020":{"37":1},"2022":{"22":1,"34":1},"2023":{"17":1,"22":1}},"Campephaga flava":{"2020":{"37":1},"2021":{"31":1}},"Pogoniulus bilineatus":{"2020":{"40":1},"2024":{"21":1}},"Microcarbo africanus":{"2020":{"42":1}},"Numida meleagris":{"2020":{"42":1},"2021":{"32":1},"2022":{"24":1},"2024":{"30":1},"2025":{"18":1,"20":1,"21":1,"24":1,"26":1,"33":1,"35":1}},"Cinnyris afer":{"2021":{"25":1},"2023":{"30":1}},"Passer diffusus":{"2021":{"26":1}},"Chalcomitra senegalensis":{"2021":{"27":2},"2024":{"19":1},"2025":{"19":2,"21":1,"22":2,"25":1,"26":1,"34":1}},"Stephanoaetus coronatus":{"2021":{"30":1},"2022":{"25":1},"2023":{"32":1}},"Tchagra australis":{"2021":{"30":1}},"Indicator variegatus":{"2021":{"31":1}},"Tockus leucomelas":{"2021":{"31":1},"2023":{"31":1}},"Pachycoccyx audeberti":{"2022":{"24":1},"2024":{"23":1},"2025":{"30":2,"32":2,"35":1}},"Halcyon albiventris":{"2022":{"27":1},"2023":{"34":1},"2024":{"21":1,"26":1,"30":1,"31":1},"2025":{"22":2,"25":2,"26":1,"30":1,"31":1,"32":1}},"Falco peregrinus":{"2022":{"28":1}},"Bostrychia hagedash":{"2022":{"28":1},"2023":{"33":1},"2025":{"19":1,"20":1,"21":1,"22":1,"24":1,"26":1,"30":1,"31":1,"33":2,"35":1}},"Campethera abingoni":{"2022":{"30":1},"2023":{"31":1,"33":1},"2024":{"21":1,"26":1},"2025":{"21":1,"27":1,"29":1,"32":1,"33":1,"34":1,"35":1}},"Phoeniculus purpureus":{"2023":{"21":1},"2024":{"21":1,"30":1},"2025":{"20":1,"21":1,"22":2,"30":1,"31":1,"32":3,"33":2,"34":2,"35":1}},"Anhinga rufa":{"2023":{"21":1}},"Chalcomitra amethystina":{"2023":{"28":1},"2024":{"31":1},"2025":{"34":2}},"Pogoniulus chrysoconus":{"2023":{"30":1},"2024":{"21":1,"26":1},"2025":{"24":1,"31":2,"33":1,"35":3}},"Chrysococcyx klaas":{"2023":{"30":1,"33":2}},"Sylvietta rufescens":{"2024":{"20":1},"2025":{"19":1,"32":1,"33":1}},"Ploceus ocularis":{"2024":{"21":1},"2025":{"34":1}},"Tchagra senegalus":{"2024":{"24":1}},"Andropadus importunus":{"2024":{"29":1},"2025":{"18":1,"21":1,"22":2,"23":1,"26":2,"29":1,"32":2,"33":2,"34":1,"35":1}},"Colius striatus":{"2024":{"29":1},"2025":{"22":1,"23":1,"24":1,"34":1}},"Telophorus viridis":{"2024":{"29":1}},"Chlorocichla flaviventris":{"2024":{"30":1},"2025":{"21":1,"25":1,"31":1,"32":1,"33":2,"34":1}},"Prodotiscus regulus":{"2024":{"30":1},"2025":{"23":1}},"Batis molitor":{"2024":{"30":1}},"Cercotrichas leucophrys":{"2024":{"30":1},"2025":{"32":1}},"Turtur chalcospilos":{"2025":{"18":1,"19":1,"20":2,"22":3,"23":1,"24":2,"29":1,"30":2,"31":1,"32":1,"33":3,"35":1}},"Laniarius ferrugineus":{"2025":{"19":3,"20":2,"21":1,"23":1,"25":2,"27":1,"30":2,"31":1,"32":1,"33":1,"35":2}},"Muscicapa adusta":{"2025":{"20":1,"26":3,"32":1,"34":1}},"Estrilda astrild":{"2025":{"20":1}},"Lagonosticta rubricata":{"2025":{"20":2}},"Cinnyris mariquensis":{"2025":{"21":1}},"Cossypha natalensis":{"2025":{"22":1,"23":1,"24":1,"26":1,"27":1,"31":1}},"Pytilia melba":{"2025":{"22":1,"23":4,"24":1}},"Emberiza tahapisi":{"2025":{"25":1,"35":2}},"Ploceus cucullatus":{"2025":{"25":1}},"Dicrurus adsimilis":{"2025":{"26":1,"32":1}},"Centropus burchellii":{"2025":{"26":1,"35":2}},"Indicator minor":{"2025":{"31":1}},"Scotopelia peli":{"2025":{"32":1}}};
+
+const COMP_WEEKS = [19,20,21,22,24,25,26,27,28,29,30,31,34];
+const CW_DATA = {"19":{"2019":1,"2020":0,"2021":1,"2022":0,"2023":1,"2024":4,"2025":15},"20":{"2019":2,"2020":0,"2021":0,"2022":1,"2023":1,"2024":7,"2025":30},"21":{"2019":3,"2020":0,"2021":1,"2022":0,"2023":4,"2024":11,"2025":21},"22":{"2019":21,"2020":0,"2021":3,"2022":2,"2023":3,"2024":1,"2025":21},"24":{"2019":0,"2020":0,"2021":2,"2022":2,"2023":3,"2024":7,"2025":16},"25":{"2019":2,"2020":0,"2021":3,"2022":3,"2023":1,"2024":2,"2025":17},"26":{"2019":0,"2020":0,"2021":4,"2022":1,"2023":1,"2024":8,"2025":29},"27":{"2019":1,"2020":0,"2021":6,"2022":5,"2023":0,"2024":6,"2025":12},"28":{"2019":12,"2020":0,"2021":2,"2022":6,"2023":5,"2024":2,"2025":0},"29":{"2019":4,"2020":0,"2021":3,"2022":1,"2023":3,"2024":9,"2025":19},"30":{"2019":5,"2020":0,"2021":6,"2022":4,"2023":8,"2024":10,"2025":23},"31":{"2019":6,"2020":0,"2021":3,"2022":1,"2023":4,"2024":2,"2025":25},"34":{"2019":0,"2020":1,"2021":4,"2022":2,"2023":3,"2024":0,"2025":25}};
+
+const MONTH_YEAR_RICHNESS = {"2019":{"4":0,"5":23,"6":5,"7":22,"8":5,"9":0,"10":0,"11":4},"2020":{"4":0,"5":0,"6":0,"7":0,"8":11,"9":7,"10":8,"11":0},"2021":{"4":1,"5":2,"6":12,"7":15,"8":10,"9":0,"10":0,"11":0},"2022":{"4":1,"5":3,"6":8,"7":15,"8":5,"9":0,"10":0,"11":0},"2023":{"4":2,"5":8,"6":6,"7":15,"8":15,"9":0,"10":0,"11":0},"2024":{"4":4,"5":22,"6":17,"7":24,"8":0,"9":0,"10":0,"11":0},"2025":{"4":0,"5":44,"6":46,"7":36,"8":54,"9":0,"10":0,"11":0}};
+
+const PHENO = {"Hedydipna collaris":[0,2,2,2,1,0,1,0],"Bycanistes bucinator":[0,3,2,4,3,0,1,0],"Apalis flavida":[0,3,3,2,1,0,0,0],"Fraseria caerulescens":[0,4,2,2,2,0,0,0],"Lagonosticta senegala":[0,2,1,1,3,0,0,0],"Motacilla aguimp":[1,4,1,2,3,0,0,0],"Alcedo semitorquata":[0,2,1,1,0,0,1,0],"Pycnonotus barbatus":[0,2,2,3,2,0,0,0],"Anaplectes rubriceps":[0,1,2,5,3,0,0,0],"Malaconotus blanchoti":[0,2,2,1,1,0,0,0],"Halcyon chelicuti":[0,1,0,0,0,0,0,0],"Prionops retzii":[0,2,3,6,1,1,0,0],"Aquila verreauxii":[1,1,0,1,0,0,0,0],"Streptopelia semitorquata":[0,2,1,1,1,0,0,0],"Emberiza flaviventris":[0,1,1,2,0,0,0,0],"Spermestes bicolor":[0,1,0,0,2,0,0,0],"Podica senegalensis":[2,2,2,3,2,0,0,0],"Cinnyris talatala":[0,4,1,1,1,0,0,0],"Lybius torquatus":[0,3,1,2,3,0,0,0],"Uraeginthus angolensis":[0,3,0,2,3,0,0,0],"Phalacrocorax carbo":[0,1,1,0,0,0,0,0],"Dessonornis humeralis":[0,3,1,2,1,0,0,0],"Zosterops virens":[0,2,2,3,4,0,0,1],"Crithagra mozambica":[0,2,2,1,1,0,0,0],"Tychaedon quadrivirgata":[0,2,1,3,1,0,0,0],"Prinia subflava":[0,0,1,4,0,0,0,0],"Turdus libonyana":[0,1,3,1,3,0,0,0],"Lagonosticta rhodopareia":[0,0,2,2,0,0,0,0],"Alopochen aegyptiaca":[1,1,1,2,2,0,0,0],"Fraseria plumbea":[0,1,0,1,0,0,0,0],"Prionops plumatus":[0,0,2,4,1,0,0,0],"Scopus umbretta":[0,2,1,5,2,0,0,0],"Treron calvus":[0,1,3,3,1,0,0,0],"Apaloderma narina":[0,2,0,3,0,0,0,0],"Camaroptera brachyura":[0,1,2,3,1,0,0,0],"Gallirex porphyreolophus":[1,2,2,3,1,0,1,1],"Megaceryle maxima":[0,1,2,2,1,0,1,0],"Spermestes cucullata":[0,0,0,1,1,0,0,0],"Dryoscopus cubla":[1,2,2,3,2,0,0,0],"Onychognathus morio":[0,1,2,2,2,0,0,0],"Oriolus larvatus":[0,1,2,2,2,0,0,0],"Crithagra gularis":[0,0,0,1,0,0,0,0],"Polyboroides typus":[0,0,1,1,0,0,0,0],"Aerospiza tachiro":[0,1,0,2,2,1,0,0],"Chlorophoneus sulfureopectus":[0,0,0,0,1,0,0,0],"Cecropis abyssinica":[0,0,0,0,0,0,1,1],"Strix woodfordii":[0,1,2,0,2,0,0,1],"Icthyophaga vocifer":[0,1,2,1,2,1,0,0],"Coccopygia melanotis":[0,0,0,0,1,1,0,0],"Motacilla clara":[1,1,1,0,1,1,0,0],"Campephaga flava":[0,0,0,0,1,1,0,0],"Pogoniulus bilineatus":[0,1,0,0,0,1,0,0],"Microcarbo africanus":[0,0,0,0,0,0,1,0],"Numida meleagris":[0,1,2,1,2,0,1,0],"Cinnyris afer":[0,0,1,1,0,0,0,0],"Passer diffusus":[0,0,1,0,0,0,0,0],"Chalcomitra senegalensis":[0,2,1,1,1,0,0,0],"Stephanoaetus coronatus":[0,0,1,1,1,0,0,0],"Tchagra australis":[0,0,0,1,0,0,0,0],"Indicator variegatus":[0,0,0,0,1,0,0,0],"Tockus leucomelas":[0,0,0,0,2,0,0,0],"Pachycoccyx audeberti":[0,0,2,1,1,0,0,0],"Halcyon albiventris":[0,2,2,3,2,0,0,0],"Falco peregrinus":[0,0,0,1,0,0,0,0],"Bostrychia hagedash":[0,1,1,2,2,0,0,0],"Campethera abingoni":[0,2,2,2,2,0,0,0],"Phoeniculus purpureus":[0,3,0,2,1,0,0,0],"Anhinga rufa":[0,1,0,0,0,0,0,0],"Chalcomitra amethystina":[0,0,0,2,1,0,0,0],"Pogoniulus chrysoconus":[0,1,2,1,1,0,0,0],"Chrysococcyx klaas":[0,0,0,1,1,0,0,0],"Sylvietta rufescens":[0,2,0,0,1,0,0,0],"Ploceus ocularis":[0,1,0,0,1,0,0,0],"Tchagra senegalus":[0,0,1,0,0,0,0,0],"Andropadus importunus":[0,1,1,2,1,0,0,0],"Colius striatus":[0,1,1,1,1,0,0,0],"Telophorus viridis":[0,0,0,1,0,0,0,0],"Chlorocichla flaviventris":[0,1,1,1,1,0,0,0],"Prodotiscus regulus":[0,0,1,1,0,0,0,0],"Batis molitor":[0,0,0,1,0,0,0,0],"Cercotrichas leucophrys":[0,0,0,1,1,0,0,0],"Turtur chalcospilos":[0,1,1,1,1,0,0,0],"Laniarius ferrugineus":[0,1,1,1,1,0,0,0],"Muscicapa adusta":[0,1,1,0,1,0,0,0],"Estrilda astrild":[0,1,0,0,0,0,0,0],"Lagonosticta rubricata":[0,1,0,0,0,0,0,0],"Cinnyris mariquensis":[0,1,0,0,0,0,0,0],"Cossypha natalensis":[0,1,1,1,0,0,0,0],"Pytilia melba":[0,0,1,0,0,0,0,0],"Emberiza tahapisi":[0,0,1,0,1,0,0,0],"Ploceus cucullatus":[0,0,1,0,0,0,0,0],"Dicrurus adsimilis":[0,0,1,0,1,0,0,0],"Centropus burchellii":[0,0,1,0,1,0,0,0],"Indicator minor":[0,0,0,0,1,0,0,0],"Scotopelia peli":[0,0,0,0,1,0,0,0]};
+
+// ══════════════════════════════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════════════════════════════
+
+// Chart 1: Richness
+new Chart(document.getElementById('chartRichness'), {
+  type:'bar',
+  data:{labels:YEARS, datasets:[{data:YEARS.map(y=>RICHNESS[y]),backgroundColor:YEAR_COLORS,borderRadius:3}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'Species'}},x:{grid:{display:false}}}}
+});
+
+// Chart 2: Records
+new Chart(document.getElementById('chartRecords'), {
+  type:'bar',
+  data:{labels:YEARS, datasets:[{data:YEARS.map(y=>RECORDS[y]),backgroundColor:YEAR_COLORS,borderRadius:3}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'Records'}},x:{grid:{display:false}}}}
+});
+
+// Chart 3: Family stacked
+new Chart(document.getElementById('chartFamilyStack'), {
+  type:'bar',
+  data:{labels:YEARS, datasets:TOP_FAMS.map((f,i)=>({
+    label:FAM_LABELS[i], data:YEARS.map(y=>FAM_YEAR[y][f]||0),
+    backgroundColor:FAM_COLORS[i%FAM_COLORS.length], stack:'s', borderWidth:0
+  }))},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10},layout:{padding:{right:10}}},
+      layout:{padding:{right:200}}},
+    scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'}}}}
+});
+
+// Heatmap
+(function(){
+  const container = document.getElementById('heatmap-container');
+  const allWeeks = [...new Set(WEEK_YEAR.map(d=>d.ioc_week))].sort((a,b)=>a-b);
+  const MIN_WK = allWeeks[0], MAX_WK = allWeeks[allWeeks.length-1];
+  const totalWks = MAX_WK - MIN_WK + 1;
+  const CELL_W=20, CELL_H=34, PAD_L=56, PAD_T=28, PAD_B=30, PAD_R=16;
+  const W = PAD_L + totalWks*CELL_W + PAD_R;
+  const H = PAD_T + YEARS.length*CELL_H + PAD_B;
+
+  const cvs = document.createElement('canvas');
+  cvs.width=W; cvs.height=H; cvs.style.cssText='max-width:100%;display:block';
+  container.appendChild(cvs);
+
+  const tip = document.createElement('div');
+  tip.style.cssText='position:fixed;background:#1a1a2e;border:1px solid rgba(26,26,46,0.3);color:#f7f4ee;font:12px "Source Sans 3",sans-serif;padding:6px 10px;border-radius:3px;pointer-events:none;display:none;z-index:999';
+  document.body.appendChild(tip);
+
+  const lookup={};
+  WEEK_YEAR.forEach(d=>{lookup[`${d.year}_${d.ioc_week}`]=d.n_species;});
+  const maxVal = Math.max(...WEEK_YEAR.map(d=>d.n_species));
+
+  const COLS = [[181,69,27],[30,107,154],[45,106,79],[200,130,10],[123,63,158],[58,124,165],[139,105,20]];
+
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle='white'; ctx.fillRect(0,0,W,H);
+
+  YEARS.forEach((yr,yi)=>{
+    const [r,g,b]=COLS[yi];
+    const y0=PAD_T+yi*CELL_H;
+    for(let wk=MIN_WK;wk<=MAX_WK;wk++){
+      const v=lookup[`${yr}_${wk}`]||0;
+      const x0=PAD_L+(wk-MIN_WK)*CELL_W;
+      // empty cells get a visible light-grey fill so grid is readable
+      if(v===0){
+        ctx.fillStyle='rgba(220,215,205,0.5)';
+        ctx.fillRect(x0+1,y0+2,CELL_W-2,CELL_H-4);
+      } else {
+        // minimum alpha 0.45 so even low values are clearly visible
+        const alpha=0.45+(v/maxVal)*0.55;
+        ctx.fillStyle=`rgba(${r},${g},${b},${alpha})`;
+        ctx.fillRect(x0+1,y0+2,CELL_W-2,CELL_H-4);
+      }
+      // solid, visible grid lines
+      ctx.strokeStyle='rgba(26,26,46,0.22)';ctx.lineWidth=0.8;ctx.strokeRect(x0+1,y0+2,CELL_W-2,CELL_H-4);
+      if(v>0){
+        // always white text for maximum legibility
+        ctx.fillStyle='rgba(255,255,255,0.97)';
+        ctx.font=v>=10?'bold 8px "Fira Mono",monospace':'bold 7px "Fira Mono",monospace';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(v,x0+CELL_W/2,y0+CELL_H/2);
+      }
+    }
+    ctx.fillStyle=`rgba(${r},${g},${b},1)`;ctx.font='bold 11px "Fira Mono",monospace';
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText(yr,PAD_L-6,y0+CELL_H/2);
+  });
+
+  ctx.fillStyle='rgba(26,26,46,0.45)';ctx.font='9px "Fira Mono",monospace';
+  ctx.textAlign='center';ctx.textBaseline='top';
+  for(let wk=MIN_WK;wk<=MAX_WK;wk++){
+    if(wk%4===0){
+      const x0=PAD_L+(wk-MIN_WK)*CELL_W+CELL_W/2;
+      ctx.fillText(`W${wk}`,x0,PAD_T+YEARS.length*CELL_H+6);
+    }
+  }
+
+  cvs.addEventListener('mousemove',e=>{
+    const rect=cvs.getBoundingClientRect();const sx=cvs.width/rect.width;
+    const mx=(e.clientX-rect.left)*sx,my=(e.clientY-rect.top)*sx;
+    const col=Math.floor((mx-PAD_L)/CELL_W),row=Math.floor((my-PAD_T)/CELL_H);
+    if(col>=0&&col<totalWks&&row>=0&&row<YEARS.length){
+      const wk=col+MIN_WK,yr=YEARS[row],v=lookup[`${yr}_${wk}`]||0;
+      tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';
+      tip.innerHTML=`<strong>${yr}</strong> · Week ${wk}<br>${v>0?`<span style="color:#95d5b2">${v} species</span>`:'<span style="color:#ccc">no data</span>'}`;
+    }else{tip.style.display='none';}
+  });
+  cvs.addEventListener('mouseleave',()=>{tip.style.display='none';});
+})();
+
+// Family common names lookup
+const FAM_COMMON = {
+  "Accipitridae":"Accipitridae (Eagles, Hawks & Kites)",
+  "Alcedinidae":"Alcedinidae (Kingfishers)",
+  "Anatidae":"Anatidae (Ducks & Geese)",
+  "Anhingidae":"Anhingidae (Darters)",
+  "Bucerotidae":"Bucerotidae (Hornbills)",
+  "Campephagidae":"Campephagidae (Cuckooshrikes)",
+  "Cisticolidae":"Cisticolidae (Cisticolas & Allies)",
+  "Coliidae":"Coliidae (Mousebirds)",
+  "Columbidae":"Columbidae (Pigeons & Doves)",
+  "Cuculidae":"Cuculidae (Cuckoos & Coucals)",
+  "Dicruridae":"Dicruridae (Drongos)",
+  "Emberizidae":"Emberizidae (Buntings)",
+  "Estrildidae":"Estrildidae (Waxbills & Firefinches)",
+  "Falconidae":"Falconidae (Falcons)",
+  "Fringillidae":"Fringillidae (Canaries & Seedeaters)",
+  "Heliornithidae":"Heliornithidae (Finfoots)",
+  "Hirundinidae":"Hirundinidae (Swallows)",
+  "Indicatoridae":"Indicatoridae (Honeyguides & Honeybirds)",
+  "Lybiidae":"Lybiidae (African Barbets)",
+  "Macrosphenidae":"Macrosphenidae (Crombecs & Allies)",
+  "Malaconotidae":"Malaconotidae (Bushshrikes & Tchagras)",
+  "Motacillidae":"Motacillidae (Wagtails & Pipits)",
+  "Muscicapidae":"Muscicapidae (Chats & Flycatchers)",
+  "Musophagidae":"Musophagidae (Turacos)",
+  "Nectariniidae":"Nectariniidae (Sunbirds)",
+  "Numididae":"Numididae (Guineafowl)",
+  "Oriolidae":"Oriolidae (Orioles)",
+  "Passeridae":"Passeridae (Sparrows)",
+  "Phalacrocoracidae":"Phalacrocoracidae (Cormorants)",
+  "Phoeniculidae":"Phoeniculidae (Wood Hoopoes)",
+  "Picidae":"Picidae (Woodpeckers)",
+  "Platysteiridae":"Platysteiridae (Batises)",
+  "Ploceidae":"Ploceidae (Weavers)",
+  "Pycnonotidae":"Pycnonotidae (Bulbuls & Greenbuls)",
+  "Scopidae":"Scopidae (Hamerkop)",
+  "Strigidae":"Strigidae (Owls)",
+  "Sturnidae":"Sturnidae (Starlings)",
+  "Threskiornithidae":"Threskiornithidae (Ibises)",
+  "Trogonidae":"Trogonidae (Trogons)",
+  "Turdidae":"Turdidae (Thrushes)",
+  "Vangidae":"Vangidae (Helmetshrikes & Allies)",
+  "Zosteropidae":"Zosteropidae (White-eyes)",
+};
+
+// Presence matrix
+const ALL_FAMILIES = [...new Set(Object.values(MATRIX).map(d=>d.family))].sort();
+const famSel = document.getElementById('filterFamily');
+ALL_FAMILIES.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;famSel.appendChild(o);});
+
+function applyFilters(){
+  const search=document.getElementById('filterName').value.toLowerCase();
+  const fam=document.getElementById('filterFamily').value;
+  const minYrs=parseInt(document.getElementById('filterMinYears').value)||0;
+  const maxYrs=parseInt(document.getElementById('filterMaxYears').value)||7;
+
+  const byFam={};
+  ALL_FAMILIES.forEach(f=>byFam[f]=[]);
+  Object.entries(MATRIX).forEach(([sci,d])=>{
+    if(d.n_years<minYrs||d.n_years>maxYrs)return;
+    if(fam&&d.family!==fam)return;
+    if(search&&!d.common.toLowerCase().includes(search)&&!sci.toLowerCase().includes(search))return;
+    if(!byFam[d.family])byFam[d.family]=[];
+    byFam[d.family].push([sci,d]);
+  });
+
+  let total=0;
+  Object.values(byFam).forEach(arr=>total+=arr.length);
+  document.getElementById('matrixStats').innerHTML=`Showing <strong>${total}</strong> species`;
+
+  let html=`<table><thead><tr><th class="left" style="min-width:200px">Scientific name</th><th class="left" style="min-width:160px">Common name</th>`;
+  YEARS.forEach(y=>html+=`<th>${y}</th>`);
+  html+=`<th>Yrs</th></tr></thead><tbody>`;
+
+  let anyRows=false;
+  ALL_FAMILIES.forEach(fam=>{
+    const rows=byFam[fam];
+    if(!rows||rows.length===0)return;
+    anyRows=true;
+    rows.sort((a,b)=>a[1].common.localeCompare(b[1].common));
+    html+=`<tr class="family-row"><td colspan="${YEARS.length+3}">${FAM_COMMON[fam]||fam} — ${rows.length} species</td></tr>`;
+    rows.forEach(([sci,d])=>{
+      html+=`<tr><td class="sci">${sci}</td><td>${d.common}</td>`;
+      YEARS.forEach(y=>html+=d.seen.includes(y)?`<td class="present">●</td>`:`<td class="absent">–</td>`);
+      html+=`<td class="years-${Math.min(d.n_years,7)}">${d.n_years}</td></tr>`;
+    });
+  });
+  if(!anyRows)html+=`<tr><td colspan="${YEARS.length+3}" style="padding:20px;color:var(--slate);font-style:italic">No species match the current filters.</td></tr>`;
+  html+='</tbody></table>';
+  document.getElementById('presenceMatrixWrap').innerHTML=html;
+}
+applyFilters();
+
+// Species explorer
+const explorerSel=document.getElementById('explorerSpecies');
+const sortedSp=Object.entries(MATRIX).sort((a,b)=>a[1].common.localeCompare(b[1].common));
+sortedSp.forEach(([sci,d])=>{
+  const o=document.createElement('option');o.value=sci;o.textContent=`${d.common} (${sci})`;explorerSel.appendChild(o);
+});
+
+let explorerChart=null;
+function updateExplorer(){
+  const sci=explorerSel.value;
+  const spData=MATRIX[sci];
+  if(spData)document.getElementById('explorerFamily').textContent=spData.family;
+
+  const yearData=SP_WEEK_YEAR[sci]||{};
+  const allWk=new Set();
+  Object.values(yearData).forEach(wd=>Object.keys(wd).forEach(w=>allWk.add(parseInt(w))));
+  const sortedWeeks=[...allWk].sort((a,b)=>a-b);
+
+  const isStacked=document.getElementById('explorerStacked').checked;
+  const datasets=YEARS.map((yr,i)=>{
+    const yd=yearData[String(yr)]||{};
+    return{label:String(yr),data:sortedWeeks.map(w=>yd[String(w)]||0),
+      backgroundColor:YEAR_COLORS[i]+'bb',borderColor:YEAR_COLORS[i],borderWidth:1.5,
+      pointRadius:4,tension:0.2};
+  }).filter(d=>d.data.some(v=>v>0));
+
+  let totalRecs=0,yearsPresent=0;
+  YEARS.forEach(yr=>{
+    const yd=yearData[String(yr)]||{};
+    const tot=Object.values(yd).reduce((a,b)=>a+b,0);
+    if(tot>0){totalRecs+=tot;yearsPresent++;}
+  });
+  document.getElementById('explorerSummary').innerHTML=[
+    `<span><strong>Total records:</strong> ${totalRecs}</span>`,
+    `<span><strong>Seasons present:</strong> ${yearsPresent} of 7</span>`,
+    sortedWeeks.length?`<span><strong>Week range:</strong> ${sortedWeeks[0]}–${sortedWeeks[sortedWeeks.length-1]}</span>`:'',
+  ].filter(Boolean).join('');
+
+  if(explorerChart)explorerChart.destroy();
+  explorerChart=new Chart(document.getElementById('chartExplorer'),{
+    type:isStacked?'bar':'line',
+    data:{labels:sortedWeeks.map(w=>`Wk ${w}`),datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:14}},
+        tooltip:{callbacks:{title:ctx=>`IOC Week ${sortedWeeks[ctx[0].dataIndex]}`}}},
+      scales:{y:{beginAtZero:true,stacked:isStacked,grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'Records'}},
+        x:{stacked:isStacked,grid:{display:false}}}}
+  });
+}
+explorerSel.value=sortedSp[0]?.[0];
+updateExplorer();
+
+// Comparable weeks chart
+(function(){
+  const activeYears=[2019,2021,2022,2023,2024,2025];
+  const labels=COMP_WEEKS.map(w=>`Wk ${w}`);
+  const datasets=activeYears.map((yr,i)=>{
+    const yri=YEARS.indexOf(yr);
+    return{label:String(yr),data:COMP_WEEKS.map(wk=>CW_DATA[wk][yr]||null),
+      borderColor:YEAR_COLORS[yri],backgroundColor:'transparent',
+      pointBackgroundColor:YEAR_COLORS[yri],pointRadius:5,borderWidth:2,tension:0.3,spanGaps:false};
+  });
+  new Chart(document.getElementById('chartCompWeeks'),{
+    type:'line',data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:14}},
+        tooltip:{callbacks:{title:items=>`IOC ${items[0].label}`}}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'Species observed'}},
+        x:{grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+
+  let th=`<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr><th style="text-align:left;padding:6px 10px;background:var(--ink);color:var(--paper);font-family:'Fira Mono',monospace;font-size:0.82rem;font-weight:700;">Week</th>`;
+  activeYears.forEach((y,i)=>{th+=`<th style="padding:6px 10px;background:var(--ink);color:${YEAR_COLORS[YEARS.indexOf(y)]};font-family:'Fira Mono',monospace;font-size:0.82rem;font-weight:700;text-align:center;">${y}</th>`;});
+  th+=`<th style="padding:6px 10px;background:var(--ink);color:#f5d06a;font-family:'Fira Mono',monospace;font-size:0.82rem;font-weight:700;text-align:center;">Avg</th><th style="padding:6px 10px;background:var(--ink);color:#f5d06a;font-family:'Fira Mono',monospace;font-size:0.82rem;font-weight:700;text-align:center;">Max</th></tr></thead><tbody>`;
+  COMP_WEEKS.forEach(wk=>{
+    const vals=activeYears.map(y=>CW_DATA[wk][y]);
+    const nz=vals.filter(v=>v>0);
+    const avg=nz.length?(nz.reduce((a,b)=>a+b,0)/nz.length).toFixed(1):'–';
+    const mx=nz.length?Math.max(...nz):'–';
+    th+=`<tr><td style="font-family:'Fira Mono',monospace;color:var(--amber);font-size:0.8rem;padding:4px 10px;">Wk ${wk}</td>`;
+    vals.forEach((v,i)=>{
+      const col=YEAR_COLORS[YEARS.indexOf(activeYears[i])];
+      th+=`<td style="text-align:center;padding:4px 10px;font-family:'Fira Mono',monospace;font-size:0.8rem;color:${v>0?col:'#ccc'};background:${v>0?col+'15':'transparent'}">${v>0?v:'·'}</td>`;
+    });
+    th+=`<td style="text-align:center;padding:4px 10px;color:var(--amber);font-size:0.8rem;">${avg}</td><td style="text-align:center;padding:4px 10px;color:var(--amber);font-size:0.8rem;">${mx}</td></tr>`;
+  });
+  th+='</tbody></table>';
+  document.getElementById('compTable').innerHTML=th;
+})();
+
+// Monthly richness chart
+(function(){
+  const MNUMS=[4,5,6,7,8,9,10,11];
+  const MLABELS=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'];
+  new Chart(document.getElementById('chartMonthly'),{
+    type:'line',
+    data:{labels:MLABELS,datasets:YEARS.map((yr,i)=>({
+      label:String(yr),data:MNUMS.map(m=>MONTH_YEAR_RICHNESS[yr][m]||null),
+      borderColor:YEAR_COLORS[i],backgroundColor:'transparent',
+      tension:0.3,pointRadius:4,borderWidth:2,spanGaps:false
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:12}}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'Species'}},x:{grid:{display:false}}}}
+  });
+
+  // Records per month all years
+  const monthRecs={4:7,5:182,6:131,7:195,8:242,9:7,10:8,11:4};
+  new Chart(document.getElementById('chartMonthRecords'),{
+    type:'bar',
+    data:{labels:MLABELS,datasets:[{data:MNUMS.map(m=>monthRecs[m]||0),
+      backgroundColor:MNUMS.map(m=>(m>=5&&m<=8)?'rgba(58,124,165,0.65)':'rgba(200,130,10,0.5)'),borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'Total records'}},x:{grid:{display:false}}}}
+  });
+})();
+
+// Phenology table
+(function(){
+  const MNLABELS=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'];
+  const byFam={};
+  Object.entries(MATRIX).forEach(([sci,d])=>{
+    if(!byFam[d.family])byFam[d.family]=[];
+    byFam[d.family].push([sci,d.common]);
+  });
+
+  let html=`<table class="pheno-table"><thead><tr>
+    <th class="sp-col" colspan="2">Species</th>
+    ${MNLABELS.map(m=>`<th>${m}</th>`).join('')}
+    </tr></thead><tbody>`;
+
+  Object.keys(byFam).sort().forEach(fam=>{
+    html+=`<tr class="family-header-row"><td colspan="10">${FAM_COMMON[fam]||fam}</td></tr>`;
+    byFam[fam].sort((a,b)=>a[1].localeCompare(b[1])).forEach(([sci,com])=>{
+      const vals=PHENO[sci]||[0,0,0,0,0,0,0,0];
+      html+=`<tr>
+        <td class="sp-name">${com}</td>
+        <td class="sp-sci">${sci}</td>
+        ${vals.map(v=>`<td class="pc${Math.min(v,7)}">${v||''}</td>`).join('')}
+      </tr>`;
+    });
+  });
+  html+='</tbody></table>';
+  document.getElementById('phenoTableWrap').innerHTML=html;
+})();
+</script>
+</body>
+</html>
