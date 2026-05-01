@@ -9,9 +9,6 @@ So pull up a chair. Pour some coffee. The road is long, but I promise you – th
 The content is deliberately broken into separate chapters, so you can follow the footsteps year by year, pause when you need to, and return when you are ready.
 
 ---
-> _"The past is never dead. It's not even past."_ – William Faulkner
-
----
 
 ## Table of Contents
 
@@ -19,9 +16,9 @@ The content is deliberately broken into separate chapters, so you can follow the
 |:---|:---|:---|
 | **Prologue** | [The Land Before Memory](https://bosloper.github.io/history/south-africa/prologue) | Before 1652 |
 | **Chapter One** | [The First Stewards – The Khoisan and the Land Before Memory](https://bosloper.github.io/history/south-africa/chapter1) | Before 1652 |
-| **Chapter Two** | The Company's Garden – The Birth of the Settlement ... Coming soon | 1652-1700 |
-| **Chapter Three** | The Trekboer Frontier – The Slow Boil ... Coming soon | 1700-1770 |
-| **Chapter Four** | The Frontier Wars Begin – The First Clashes ... Coming soon | 1770-1795 |
+| **Chapter Two** | [The Company's Garden – 1652-1700 – The Birth of the Settlement](https://bosloper.github.io/history/south-africa/chapter2) | 1652-1700 |
+| **Chapter Three** | [The Trekboer Frontier – 1700-1770 – The Slow Boil](https://bosloper.github.io/history/south-africa/chapter3) | 1700-1770 |
+| **Chapter Four** | [The Frontier Wars Begin – 1770-1795 – The First Clashes](https://bosloper.github.io/history/south-africa/chapter4) | 1770-1795 |
 | **Chapter Five** | Coming soon | 1795-1814 |
 | **Chapter Six** | Coming soon | 1814-1835 |
 | *More to follow...* | |
@@ -29,4 +26,4 @@ The content is deliberately broken into separate chapters, so you can follow the
 ---
 
 © Andries de Vries, 2026. All rights reserved.  
-> *This work was written with the assistance of DeepSeek AI, used as a research and drafting tool.* **No part may be reproduced without permission.**
+> *This work was written with the assistance of DeepSeek AI, used as a research and drafting tool. No part of this work may be reproduced, distributed, or transmitted in any form without prior written permission.*
