@@ -1,5 +1,4 @@
-# Chapter Five: The British Interregnum – 1795 to 1814  
-*The First British Occupation and Its Aftermath*
+# Chapter Five: The British Interregnum – 1795 to 1835 – The First British Occupation and the Gathering Storm
 
 ## I. The Flag Changes
 
@@ -55,7 +54,23 @@ But Cradock also made it clear: the trekboers were not free to do as they please
 
 The trekboers listened. They said nothing. They began to plan.
 
-## VI. The 1820 Settlers
+## VI. The Slachters Nek Rebellion (1815)
+
+The first open resistance came in 1815.
+
+A Boer named **Frederick Bezuidenhout** refused to answer a summons from the local magistrate. When a Khoikhoi constable tried to arrest him, Bezuidenhout fired his gun. He was killed in the ensuing chase.
+
+His brother, **Johannes Bezuidenhout**, called his neighbours to arms. About a hundred men gathered at **Slachters Nek** (near present-day Cookhouse) to "liberate" the district from British tyranny.
+
+The rebellion was a farce. The Boers were poorly armed, badly led, and betrayed by a spy. They surrendered without a fight.
+
+Five of the leaders were sentenced to death. Four were hanged. The fifth – who had struggled so violently that he had to be wrestled to the ground – was hanged twice.
+
+The executions horrified the frontier. Even British officials were disturbed. But the message was clear: Britain would not tolerate armed rebellion.
+
+The trekboers did not forget Slachters Nek. They remembered the ropes and the bodies dangling in the morning sun.
+
+## VII. The 1820 Settlers
 
 The most fateful British decision of this era was not about the trekboers at all. It was about the **1820 Settlers**.
 
@@ -65,23 +80,59 @@ The trekboers watched these pale, soft-handed, English-speaking newcomers with a
 
 The Eastern Cape, once a no-man's-land of trekboer independence, was becoming English.
 
-## VII. The Seeds of the Great Trek
+## VIII. English as the Language of Power (1822)
 
-By 1814, the pattern was set. The British were here to stay. They brought law, language, and a new kind of settler. They also brought missionaries – men like **Dr. John Philip** of the London Missionary Society – who spoke openly of Khoikhoi rights, of justice for slaves, of equality before God.
+In 1822, the British authorities decreed that English would be the sole official language of the Cape Colony. Courts, government offices, and schools would operate in English. Dutch – the language of the trekboer, the language of the Bible, the language of the home – was reduced to a foreign dialect.
 
-The trekboers did not want equality. They did not want justice for the Khoikhoi. They wanted land, labour, and freedom from interference.
+The Boers were not consulted. Their language, their culture, their connection to their own history – all were now officially second-class.
 
-They began to talk – quietly at first, then with growing urgency – of leaving. Of going east, beyond the Fish River. Of going north, beyond the Orange River. Of finding a place where no British flag flew and no British judge sat.
+Resentment grew. Fathers who could not speak English were humiliated in court. Children who spoke Dutch at school were punished. The language of the *volk* was being erased.
 
-The Great Trek was still two decades away. But the dream of it was already being born – in dusty farmhouses, around smoky campfires, in the hearts of men who had crossed one river too many and found, on the other side, not freedom, but another fence.
+## IX. Ordinance 50 (1828)
 
-## VIII. The End of the Beginning
+The most shocking blow came in 1828.
 
-The British Interregnum ended not with a bang, but with a census. By 1814, the Cape Colony had 50,000 inhabitants: 25,000 white, 25,000 slaves, and an unknown number of Khoikhoi and free Blacks. The trekboers were a minority, pushed to the margins, their way of life under threat.
+**Ordinance 50** granted legal equality to the Khoikhoi and other "free persons of colour" – the same rights as white citizens to own land, to move freely, to choose their employers. The Khoikhoi were no longer bound to serve a master. They were, in the eyes of the law, free.
 
-They would not forget. They would not forgive. And when the moment came, they would go.
+For the trekboers, this was a disaster. Their entire economic system – their farms, their herds, their way of life – depended on cheap, controlled labour. If the Khoikhoi could leave, who would tend the sheep? Who would milk the cows? Who would work the fields?
 
-The road east was calling.
+The trekboers saw it as a betrayal. Britain had taken their language. Now Britain was taking their labourers. What would be next?
+
+## X. The Abolition of Slavery (1834)
+
+The answer came six years later.
+
+On 1 December 1834, slavery was abolished throughout the British Empire. All slaves were freed – not immediately, but after a four-year "apprenticeship" period. The owners received compensation, but it was meagre, and it had to be claimed in London.
+
+For the trekboers, abolition was not a matter of justice or morality. It was an economic catastrophe. Their farms, their households, their entire way of life had been built on the backs of unfree labour. The compensation was a fraction of the value of the slaves they had lost.
+
+The British did not understand. The missionaries applauded. The humanitarians rejoiced. But the trekboers looked at their empty fields, their unpaid debts, their uncertain future – and they made a decision.
+
+They would leave.
+
+## XI. The Missionary Factor
+
+Throughout this period, British missionaries – most notably **Dr. John Philip** of the London Missionary Society – had been tireless advocates for the Khoikhoi, the San, and the slaves. They reported abuses to London, lobbied Parliament, and filled the colonial press with stories of Boer cruelty.
+
+The trekboers hated the missionaries with a passion that is hard to exaggerate. They saw them as spies, hypocrites, and traitors to their own race. A missionary, in the trekboer's eyes, was worse than a Xhosa warrior – because the warrior fought openly, while the missionary undermined from within.
+
+The missionaries, in turn, saw the trekboers as backward, brutal, and blind to the plain commands of the Gospel. They believed that British rule, British law, and British civilisation were gifts to be forced upon the unwilling.
+
+There could be no reconciliation. The two sides spoke different languages – literally and spiritually.
+
+## XII. The Great Trek Beckons
+
+By 1835, the pressure had become unbearable. The trekboers had lost their language, their labour, and their self-respect. They had been humiliated at Slachters Nek, marginalised by English, and impoverished by abolition.
+
+They looked north – across the Orange River, into the vast, empty, ungoverned interior. There, they believed, they could rebuild their world: a world of Dutch-speaking farms, obedient servants, and no British judges.
+
+The Great Trek was not a spontaneous flight. It was a slow, deliberate withdrawal – a people turning their backs on a government they could no longer trust.
+
+The wagons were being prepared.
+
+The camps were being gathered.
+
+The road was calling.
 
 ---
 

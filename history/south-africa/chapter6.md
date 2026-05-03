@@ -34,15 +34,19 @@ But their journals, passed from hand to hand, provided invaluable intelligence: 
 
 ## IV. The Ndebele and the Battle of Vegkop (1836)
 
-The most powerful African kingdom north of the Vaal River was the **Ndebele** under their king, **Mzilikazi**. Mzilikazi had been a general of the great Zulu king Shaka, but had broken away and led his people north, conquering a vast territory.
+The most powerful African kingdom north of the Vaal River was the **Ndebele** under their king, **Mzilikazi**. Mzilikazi had been a general of the great Zulu king Shaka, but had broken away and led his people north, conquering a vast territory that stretched from the Highveld into present-day Zimbabwe.
+
+But Mzilikazi's *impis* (warriors) did not stay within their borders. They raided far and wide – south of the Vaal River, into the grasslands between the Orange and the Vaal – seeking cattle, captives, and tribute.
 
 Mzilikazi saw the Voortrekkers as a threat. He attacked their laagers, drove off their cattle, and killed their stragglers.
 
-In October 1836, a Voortrekker group led by **Andries Potgieter** was attacked at **Vegkop** by an Ndebele impi of 5,000 warriors. The 40 Voortrekkers formed a *laager* – a circle of wagons, chained together, with ox-hides hung between to stop spears and arrows. From behind this wall, they fired their muskets.
+In October 1836, a Voortrekker group led by **Andries Potgieter** was attacked at **Vegkop** (near present-day Heilbron, in the Free State – south of the Vaal River) by an Ndebele impi of 5,000 warriors. The 40 Voortrekkers formed a *laager* – a circle of wagons, chained together, with ox-hides hung between to stop spears and arrows. From behind this wall, they fired their muskets.
 
 The Ndebele charged again and again. They could not break the laager. They lost hundreds of men. But they captured almost all the Voortrekkers' cattle – a devastating blow.
 
 The Voortrekkers had won the battle but lost their means of survival. They were forced to retreat, to beg for help from Griqua and Rolong allies, to regroup and try again.
+
+The battle of Vegkop was not a decisive victory. It was a warning: the interior was not empty, and the road north would be paved with blood.
 
 ## V. The Natal Route and Piet Retief
 
