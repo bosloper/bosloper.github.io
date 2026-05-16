@@ -1,7 +1,7 @@
-# South African History
-South African History: Colonial to Democracy
+# Afrikaner History
+The South African History: Colonial to Democracy
 
-This is the **slow road** through the history of South Africa – the people who were here first, the people who came later, and the land that watched it all unfold.
+This is the **slow road** through the history of South Africa – the people who were here first, the people who came later, and the land that watched it all unfold. From our Dutch ancestors to the dawn of an Afrikaner Republic in 1961.
 
 This is not a journal of events. It is a story. A story of the land and the people who walked it, fought over it, loved it, and shaped it. Some came as herders, some as hunters, some as settlers, some as slaves. Some arrived in chains; some came seeking freedom. All left footprints.
 
